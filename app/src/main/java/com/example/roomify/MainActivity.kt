@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.viewinterop.AndroidView
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -48,6 +47,16 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            System.loadLibrary("opencv_java4")
+            Log.d("OpenCV", "✅ OpenCV cargado manualmente")
+        } catch (e: UnsatisfiedLinkError) {
+            Log.e("OpenCV", "❌ Error al cargar OpenCV: ${e.message}")
+        }
     }
 
     @Composable
