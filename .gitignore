@@ -13,3 +13,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# === Unity ===
+[Ll]ibrary/
+[Tt]emp/
+[Bb]uild/
+[Oo]bj/
+*.csproj
+*.unityproj
+*.sln
+*.userprefs
+.vscode/
