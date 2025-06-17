@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -19,11 +20,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.roomify.OpenCVUtils.correctBitmapRotation
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -35,6 +38,7 @@ class CaptureActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         setContent {
@@ -63,6 +67,9 @@ class CaptureActivity : ComponentActivity() {
         val lifecycleOwner = LocalLifecycleOwner.current
         val previewView = remember { PreviewView(context) }
         val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
+
+        var capturedImage by remember { mutableStateOf<File?>(null) }
+        var isPreviewing by remember { mutableStateOf(false) }
 
         val totalFotos = 4
         var photoCount by remember { mutableStateOf(0) }
@@ -119,6 +126,53 @@ class CaptureActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 )
 
+                capturedImage?.let { imageFile ->
+                    val bitmap = remember(imageFile) {
+                        correctBitmapRotation(imageFile)
+                    }
+
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Imagen capturada",
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 80.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Button(onClick = {
+                            photoCount++
+                            isPreviewing = false
+                            capturedImage = null
+
+                            if (photoCount == totalFotos) {
+                                Toast.makeText(
+                                    context,
+                                    "✅ Escaneo completado. Se tomaron $totalFotos fotos.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                // Aquí podrías navegar o guardar el modelo
+                            }
+                        }) {
+                            Text("Aceptar")
+                        }
+
+                        Button(onClick = {
+                            capturedImagePaths.removeLastOrNull()
+                            capturedImage?.delete()
+                            capturedImage = null
+                            isPreviewing = false
+                        }) {
+                            Text("Repetir")
+                        }
+                    }
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -135,60 +189,112 @@ class CaptureActivity : ComponentActivity() {
                         .padding(top = 24.dp)
                 )
 
-                Button(
-                    onClick = {
-                        if (photoCount >= totalFotos) {
-                            Toast.makeText(context, "¡Ya has capturado las $totalFotos fotos!", Toast.LENGTH_SHORT).show()
-                            return@Button
-                        }
+                if (!isPreviewing) {
+                    Button(
+                        onClick = {
+                            photoCount++
+                            isPreviewing = false
+                            capturedImage = null
+                            if (photoCount >= totalFotos) {
+                                Toast.makeText(
+                                    context,
+                                    "¡Ya has capturado las $totalFotos fotos!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                return@Button
+                            }
 
-                        val photoFile = File(
-                            context.cacheDir,
-                            "IMG_${System.currentTimeMillis()}.jpg"
-                        )
+                            val photoFile = File(
+                                context.cacheDir,
+                                "IMG_${System.currentTimeMillis()}.jpg"
+                            )
 
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                            val outputOptions =
+                                ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-                        imageCapture.takePicture(
-                            outputOptions,
-                            ContextCompat.getMainExecutor(context),
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onError(exc: ImageCaptureException) {
-                                    Toast.makeText(context, "Error: ${exc.message}", Toast.LENGTH_SHORT).show()
-                                }
-
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    capturedImagePaths.add(photoFile.absolutePath)
-                                    photoCount++
-
-                                    Log.d("CaptureActivity", "Ruta guardada: ${photoFile.absolutePath}")
-                                    Toast.makeText(
-                                        context,
-                                        "Imagen ${photoCount} guardada:\n${photoFile.absolutePath}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    if (photoCount == totalFotos) {
+                            imageCapture.takePicture(
+                                outputOptions,
+                                ContextCompat.getMainExecutor(context),
+                                object : ImageCapture.OnImageSavedCallback {
+                                    override fun onError(exc: ImageCaptureException) {
                                         Toast.makeText(
                                             context,
-                                            "✅ Escaneo completado. Se tomaron $totalFotos fotos.",
-                                            Toast.LENGTH_LONG
+                                            "Error: ${exc.message}",
+                                            Toast.LENGTH_SHORT
                                         ).show()
-                                        // Aquí podrías navegar o guardar el modelo
+                                    }
+
+                                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                        capturedImagePaths.add(photoFile.absolutePath)
+                                        capturedImage = photoFile
+                                        isPreviewing = true
+
+                                        Log.d(
+                                            "CaptureActivity",
+                                            "Ruta guardada: ${photoFile.absolutePath}"
+                                        )
+                                        Toast.makeText(
+                                            context,
+                                            "Imagen ${photoCount} guardada:\n${photoFile.absolutePath}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                        if (photoCount == totalFotos) {
+                                            Toast.makeText(
+                                                context,
+                                                "✅ Escaneo completado. Se tomaron $totalFotos fotos.",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                            // Aquí podrías navegar o guardar el modelo
+                                        }
                                     }
                                 }
-                            }
-                        )
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(24.dp)
-                ) {
-                    Text("Capturar")
+                            )
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(24.dp)
+                    ) {
+                        Text("Capturar")
+                    }
                 }
             }
         } else {
             Text("Se requiere permiso de cámara.")
         }
     }
+
+
+    @Composable
+    fun Greeting(name: String, modifier: Modifier = Modifier) {
+        Text(
+            text = "Hello $name!",
+            modifier = modifier
+        )
+    }
+
+    @Composable
+    fun ProcessedImagePreview(imagePath: String) {
+        val bitmap = remember(imagePath) {
+            OpenCVUtils.processImageToGray(File(imagePath))
+        }
+
+        bitmap?.let {
+            Image(
+                bitmap = it.asImageBitmap(),
+                contentDescription = "Processed Image",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            )
+        } ?: Text("No se pudo procesar la imagen")
+    }
+
+    //@Preview(showBackground = true)
+    //@Composable
+    //fun GreetingPreview() {
+    //    RoomifyTheme {
+    //        Greeting("Android")
+    //    }
+    //}
 }
