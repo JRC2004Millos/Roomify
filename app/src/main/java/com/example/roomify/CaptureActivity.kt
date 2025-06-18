@@ -15,6 +15,9 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +41,8 @@ class CaptureActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -71,7 +76,6 @@ class CaptureActivity : ComponentActivity() {
         var capturedImage by remember { mutableStateOf<File?>(null) }
         var isPreviewing by remember { mutableStateOf(false) }
 
-        val totalFotos = 4
         var photoCount by remember { mutableStateOf(0) }
         val capturedImagePaths = remember { mutableStateListOf<String>() }
 
@@ -139,6 +143,7 @@ class CaptureActivity : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(16.dp)
                     )
+
                     Row(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
@@ -149,15 +154,6 @@ class CaptureActivity : ComponentActivity() {
                             photoCount++
                             isPreviewing = false
                             capturedImage = null
-
-                            if (photoCount == totalFotos) {
-                                Toast.makeText(
-                                    context,
-                                    "✅ Escaneo completado. Se tomaron $totalFotos fotos.",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                // Aquí podrías navegar o guardar el modelo
-                            }
                         }) {
                             Text("Aceptar")
                         }
@@ -173,15 +169,8 @@ class CaptureActivity : ComponentActivity() {
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(32.dp)
-                        .border(2.dp, Color.White)
-                )
-
                 Text(
-                    text = "Foto ${photoCount + 1} de $totalFotos",
+                    text = "Foto ${photoCount + 1}",
                     color = Color.White,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier
@@ -189,20 +178,30 @@ class CaptureActivity : ComponentActivity() {
                         .padding(top = 24.dp)
                 )
 
+                Button(
+                    onClick = {
+                        if (photoCount == 0) {
+                            Toast.makeText(context, "Debes capturar al menos una imagen.", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+
+                        val intent = android.content.Intent(context, MainActivity::class.java)
+                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                        if (context is ComponentActivity) {
+                            context.finish()
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = "Finalizar captura", tint = Color.White)
+                }
+
                 if (!isPreviewing) {
                     Button(
                         onClick = {
-                            photoCount++
-                            isPreviewing = false
-                            capturedImage = null
-                            if (photoCount >= totalFotos) {
-                                Toast.makeText(
-                                    context,
-                                    "¡Ya has capturado las $totalFotos fotos!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                return@Button
-                            }
 
                             val photoFile = File(
                                 context.cacheDir,
@@ -235,18 +234,9 @@ class CaptureActivity : ComponentActivity() {
                                         )
                                         Toast.makeText(
                                             context,
-                                            "Imagen ${photoCount} guardada:\n${photoFile.absolutePath}",
+                                            "Imagen ${photoCount+1} guardada",
                                             Toast.LENGTH_SHORT
                                         ).show()
-
-                                        if (photoCount == totalFotos) {
-                                            Toast.makeText(
-                                                context,
-                                                "✅ Escaneo completado. Se tomaron $totalFotos fotos.",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                            // Aquí podrías navegar o guardar el modelo
-                                        }
                                     }
                                 }
                             )
@@ -255,22 +245,13 @@ class CaptureActivity : ComponentActivity() {
                             .align(Alignment.BottomCenter)
                             .padding(24.dp)
                     ) {
-                        Text("Capturar")
+                        Icon(Icons.Default.CameraAlt, contentDescription = "Capturar", tint = Color.White)
                     }
                 }
             }
         } else {
             Text("Se requiere permiso de cámara.")
         }
-    }
-
-
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
     }
 
     @Composable
@@ -289,12 +270,4 @@ class CaptureActivity : ComponentActivity() {
             )
         } ?: Text("No se pudo procesar la imagen")
     }
-
-    //@Preview(showBackground = true)
-    //@Composable
-    //fun GreetingPreview() {
-    //    RoomifyTheme {
-    //        Greeting("Android")
-    //    }
-    //}
 }
