@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cubo Giratorio con Cuadrícula</title>
+    <!-- Incluye la librería p5.js -->
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+        background: transparent !important;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      let angle = 0; // Ángulo para la rotación del cubo
+      let cubeSize = 150; // Tamaño del cubo
+      let gridSize = 10; // Número de divisiones de la cuadrícula por lado
+
+      function setup() {
+        // Crea un lienzo (canvas) en modo WebGL para 3D
+        createCanvas(200, 200, WEBGL);
+        // Este modo permite transparencia en el fondo
+        gl = this._renderer.GL;
+        gl.clearColor(0, 0, 0, 0); // ← importante: canal alfa en 0
+        // Configura un modo de cámara ortográfica para una vista sin perspectiva
+        // Descomenta la línea de abajo y comenta la siguiente para probar proyección en perspectiva
+        //ortho(); // Vista ortográfica, ideal para ver la geometría sin distorsión
+        let zoom = 1.5;
+        ortho(-width / zoom, width / zoom, -height / zoom, height / zoom, 0.1, 1000);
+
+      }
+
+      function draw() {
+        // Limpia el lienzo en cada frame
+        clear();
+
+        // Luz ambiente para iluminar todas las caras
+        ambientLight(100);
+        // Una luz puntual para dar más contraste
+        pointLight(255, 255, 255, 0, 0, 400);
+
+        // Centra el cubo en la pantalla virtual de WebGL (ya es el centro por defecto)
+        // translate(0, 0, 0);
+
+        // Aplica las rotaciones. Usamos seno/coseno con frameCount para un movimiento más orgánico
+        // Puedes usar 'angle' directamente para una rotación lineal y suave
+        rotateX(angle * 0.4);
+        rotateY(angle * 0.7);
+        rotateZ(angle * 0.1); // Pequeña rotación en Z para un efecto extra
+
+        // Dibuja el cubo con la cuadrícula
+        drawCubeWithGrid(cubeSize, gridSize);
+
+        // Incrementa el ángulo para la animación
+        angle += 0.01;
+      }
+
+      // Función para dibujar un cubo con una cuadrícula en cada cara
+      function drawCubeWithGrid(s, divisions) {
+        let h = s / 2; // Media longitud del lado del cubo
+        let step = s / divisions; // Tamaño de cada celda de la cuadrícula
+
+        noStroke(); // Por defecto, no dibujamos el borde de las caras
+
+        // Array de vértices del cubo para mayor legibilidad
+        // Define los 8 vértices del cubo
+        const vertices = {
+          v1: createVector(-h, -h, -h), // back, top, left
+          v2: createVector(h, -h, -h), // back, top, right
+          v3: createVector(h, h, -h), // back, bottom, right
+          v4: createVector(-h, h, -h), // back, bottom, left
+          v5: createVector(-h, -h, h), // front, top, left
+          v6: createVector(h, -h, h), // front, top, right
+          v7: createVector(h, h, h), // front, bottom, right
+          v8: createVector(-h, h, h), // front, bottom, left
+        };
+
+        // ---- Funciones auxiliares para dibujar una cara y su cuadrícula ----
+
+        // Dibuja un plano (cara del cubo) y luego las líneas de la cuadrícula sobre él
+        function drawPlaneAndGrid(
+          p1,
+          p2,
+          p3,
+          p4,
+          normalAxis,
+          constantCoord,
+          colorBias
+        ) {
+          // p1, p2, p3, p4 son los vértices de la cara en orden horaria/anti-horaria
+          // normalAxis: 'x', 'y', o 'z' para saber qué eje es constante en esta cara
+          // constantCoord: el valor de la coordenada constante (ej. h o -h)
+          // colorBias: un pequeño ajuste al color para diferenciar las caras
+
+          fill(80 + colorBias); // Color base de la cara
+
+          // Dibuja la cara (un cuadrado)
+          beginShape(QUADS);
+          vertex(p1.x, p1.y, p1.z);
+          vertex(p2.x, p2.y, p2.z);
+          vertex(p3.x, p3.y, p3.z);
+          vertex(p4.x, p4.y, p4.z);
+          endShape(CLOSE);
+
+          // Dibuja la cuadrícula sobre esta cara
+          stroke(200); // Color de las líneas de la cuadrícula
+          strokeWeight(1.5); // Grosor de las líneas
+
+          for (let i = 1; i < divisions; i++) {
+            let offset = -h + i * step;
+
+            switch (normalAxis) {
+              case "z": // Cara en el plano XY (frontal/trasera)
+                line(-h, offset, constantCoord, h, offset, constantCoord); // Líneas horizontales (cambia X, Y constante)
+                line(offset, -h, constantCoord, offset, h, constantCoord); // Líneas verticales (cambia Y, X constante)
+                break;
+              case "x": // Cara en el plano YZ (derecha/izquierda)
+                line(constantCoord, -h, offset, constantCoord, h, offset); // Líneas "horizontales" (cambia Y, Z constante)
+                line(constantCoord, offset, -h, constantCoord, offset, h); // Líneas "verticales" (cambia Z, Y constante)
+                break;
+              case "y": // Cara en el plano XZ (superior/inferior)
+                line(-h, constantCoord, offset, h, constantCoord, offset); // Líneas "horizontales" (cambia X, Z constante)
+                line(offset, constantCoord, -h, offset, constantCoord, h); // Líneas "verticales" (cambia Z, X constante)
+                break;
+            }
+          }
+        }
+
+        // ---- Dibujar cada una de las 6 caras con su cuadrícula ----
+
+        // Cara frontal (Z = h)
+        drawPlaneAndGrid(
+          vertices.v5,
+          vertices.v6,
+          vertices.v7,
+          vertices.v8,
+          "z",
+          h,
+          70
+        );
+        // Cara trasera (Z = -h)
+        drawPlaneAndGrid(
+          vertices.v1,
+          vertices.v2,
+          vertices.v3,
+          vertices.v4,
+          "z",
+          -h,
+          0
+        );
+        // Cara derecha (X = h)
+        drawPlaneAndGrid(
+          vertices.v2,
+          vertices.v6,
+          vertices.v7,
+          vertices.v3,
+          "x",
+          h,
+          40
+        );
+        // Cara izquierda (X = -h)
+        drawPlaneAndGrid(
+          vertices.v1,
+          vertices.v5,
+          vertices.v8,
+          vertices.v4,
+          "x",
+          -h,
+          40
+        );
+        // Cara superior (Y = -h)
+        drawPlaneAndGrid(
+          vertices.v1,
+          vertices.v2,
+          vertices.v6,
+          vertices.v5,
+          "y",
+          -h,
+          20
+        );
+        // Cara inferior (Y = h)
+        drawPlaneAndGrid(
+          vertices.v4,
+          vertices.v3,
+          vertices.v7,
+          vertices.v8,
+          "y",
+          h,
+          20
+        );
+      }
+    </script>
+  </body>
+</html>

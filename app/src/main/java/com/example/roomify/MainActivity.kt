@@ -11,9 +11,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Folder
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import android.net.Uri
+import android.widget.VideoView
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.roomify.ui.theme.BeigeClaro
 import com.example.roomify.ui.theme.RoomifyTheme
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +46,7 @@ class MainActivity : ComponentActivity() {
     fun MainMenu() {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.surface
         ) {
             Box(
                 modifier = Modifier
@@ -51,8 +59,12 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth()
                         .wrapContentHeight(),
                     shape = RoundedCornerShape(24.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
-                ) {
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background // ← pon aquí el color que desees
+                    )
+                )
+                {
                     Column(
                         modifier = Modifier
                             .padding(24.dp)
@@ -60,29 +72,40 @@ class MainActivity : ComponentActivity() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        // Placeholder de logo o imagen superior
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_roomify_logo), // reemplaza por tu logo si tienes uno
-                            contentDescription = "Roomify Logo",
+                        AndroidView(
+                            factory = { context ->
+                                WebView(context).apply {
+                                    settings.javaScriptEnabled = true
+                                    settings.useWideViewPort = true
+                                    settings.loadWithOverviewMode = true
+                                    settings.setSupportZoom(false)
+                                    settings.builtInZoomControls = false
+                                    settings.displayZoomControls = false
+                                    setBackgroundColor(0x00000000)
+                                    webViewClient = WebViewClient()
+                                    loadUrl("file:///android_asset/cubo_giratorio.html")
+                                }
+                            },
                             modifier = Modifier
-                                .size(100.dp)
-                                .padding(top = 8.dp),
-                            contentScale = ContentScale.Fit,
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                                .height(210.dp) // ← Asegura un espacio generoso y constante
+                                .width(200.dp) // ← Asegura un espacio generoso y constante
+                                .align(Alignment.CenterHorizontally) // ← CENTRA el WebView en el contenedor
                         )
+
+
 
                         Text(
                             text = "Bienvenido a Roomify",
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         Text(
                             text = "Escanea y gestiona tus espacios en 3D",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.primary
                         )
 
                         Button(
@@ -97,15 +120,12 @@ class MainActivity : ComponentActivity() {
                             Text("Escanear nueva habitación")
                         }
 
-                        OutlinedButton(
+                        Button(
                             onClick = {
-                                // startActivity(Intent(this@MainActivity, ModelLibraryActivity::class.java))
+                                startActivity(Intent(this@MainActivity, LibreriaActivity::class.java))
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            )
+                            shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(Icons.Filled.Folder, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
