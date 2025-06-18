@@ -37,7 +37,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".CaptureActivity" />
+        <activity android:name=".LibreriaActivity" />
+        <activity android:name=".CargaActivity" />
+
+
 
     </application>
 
