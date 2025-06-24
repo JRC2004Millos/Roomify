@@ -45,7 +45,7 @@ class CaptureActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-    }
+       }
 
     override fun onResume() {
         super.onResume()

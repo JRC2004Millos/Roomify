@@ -8,7 +8,7 @@ android {
     namespace = "com.example.roomify"
     compileSdk = 35
 
-    defaultConfig {
+    defaultConfig { 
         applicationId = "com.example.roomify"
         minSdk = 26
         targetSdk = 35

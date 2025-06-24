@@ -26,3 +26,4 @@ val opencvsdk = file("sdk")
 include(":app", ":sdk")
 project(":sdk").projectDir = opencvsdk
 include(":sdk")
+include(":procesamiento3d")
