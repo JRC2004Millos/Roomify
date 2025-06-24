@@ -8,7 +8,7 @@ android {
     namespace = "com.example.roomify"
     compileSdk = 35
 
-    defaultConfig { 
+    defaultConfig {
         applicationId = "com.example.roomify"
         minSdk = 26
         targetSdk = 35
@@ -48,6 +48,7 @@ dependencies {
     implementation("androidx.camera:camera-view:$camerax_version")
     implementation("androidx.camera:camera-extensions:$camerax_version")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation(project(":procesamiento3d"))
 
 
     implementation(libs.androidx.core.ktx)
