@@ -14,7 +14,6 @@ class ImageProcessorTest {
     init {
         try {
             System.load("C:\\Users\\Usuario\\Downloads\\opencv\\build\\java\\x64\\opencv_java480.dll")
-            println("✅ OpenCV cargado manualmente")
         } catch (e: UnsatisfiedLinkError) {
             println("❌ Error al cargar OpenCV: " + e.message)
         }
@@ -22,18 +21,20 @@ class ImageProcessorTest {
 
     @Test
     fun generarPLYdesdeMultiplesTriangulaciones() {
-        val rutas = listOf(
-            "C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\imga1.jpg",
-            "C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\imga2.jpg",
-            "C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\imga3.jpg",
-            "C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\imga4.jpg"
-        )
+        val carpeta = File("C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\Bano Juanda")
+        val imagenes = carpeta.listFiles { f -> f.extension.lowercase() in listOf("jpg", "jpeg", "png") }
+            ?.sortedBy { it.name } ?: emptyList()
+
+        if (imagenes.size < 2) {
+            println("❌ Se requieren al menos dos imágenes en la carpeta.")
+            return
+        }
 
         val puntos3D = mutableListOf<Triple<Double, Double, Double>>()
 
-        for (i in 0 until rutas.size - 1) {
-            val img1 = Imgcodecs.imread(rutas[i], Imgcodecs.IMREAD_GRAYSCALE)
-            val img2 = Imgcodecs.imread(rutas[i + 1], Imgcodecs.IMREAD_GRAYSCALE)
+        for (i in 0 until imagenes.size - 1) {
+            val img1 = Imgcodecs.imread(imagenes[i].absolutePath, Imgcodecs.IMREAD_GRAYSCALE)
+            val img2 = Imgcodecs.imread(imagenes[i + 1].absolutePath, Imgcodecs.IMREAD_GRAYSCALE)
 
             if (img1.empty() || img2.empty()) continue
 
@@ -60,9 +61,16 @@ class ImageProcessorTest {
                 }
             }
 
+            if (pts1.size < 8 || pts2.size < 8) continue
+
             val matPts1 = MatOfPoint2f(*pts1.toTypedArray())
             val matPts2 = MatOfPoint2f(*pts2.toTypedArray())
             val fundamental = Calib3d.findFundamentalMat(matPts1, matPts2, Calib3d.FM_RANSAC)
+
+            if (fundamental.empty()) continue
+
+            val F64 = Mat()
+            fundamental.convertTo(F64, CvType.CV_64F)
 
             val focal = 800.0
             val cx = img1.cols() / 2.0
@@ -73,20 +81,32 @@ class ImageProcessorTest {
             K.put(1, 1, focal)
             K.put(1, 2, cy)
 
+            val Kt = Mat()
+            Core.transpose(K, Kt)
+
+            // Verificamos tipos antes de multiplicar
             val temp = Mat()
-            Core.gemm(K.t(), fundamental, 1.0, Mat(), 0.0, temp)
+            Core.gemm(Kt, F64, 1.0, Mat.zeros(3, 3, CvType.CV_64F), 0.0, temp, 0)
+
             val E = Mat()
-            Core.gemm(temp, K, 1.0, Mat(), 0.0, E)
+            Core.gemm(temp, K, 1.0, Mat.zeros(3, 3, CvType.CV_64F), 0.0, E, 0)
+
             val R = Mat()
             val t = Mat()
             Calib3d.recoverPose(E, matPts1, matPts2, K, R, t)
 
             val P1 = Mat.eye(3, 4, CvType.CV_64F)
+
             val Rt = Mat(3, 4, CvType.CV_64F)
-            R.copyTo(Rt.colRange(0, 3))
-            t.copyTo(Rt.col(3))
+            val R64 = Mat()
+            val t64 = Mat()
+            R.convertTo(R64, CvType.CV_64F)
+            t.convertTo(t64, CvType.CV_64F)
+            R64.copyTo(Rt.colRange(0, 3))
+            t64.copyTo(Rt.col(3))
+
             val P2 = Mat()
-            Core.gemm(K, Rt, 1.0, Mat(), 0.0, P2)
+            Core.gemm(K, Rt, 1.0, Mat.zeros(3, 4, CvType.CV_64F), 0.0, P2)
 
             val pts4D = Mat()
             Calib3d.triangulatePoints(P1, P2, matPts1, matPts2, pts4D)
@@ -99,17 +119,27 @@ class ImageProcessorTest {
             }
         }
 
+        val factorEscalado = 1000.0
+        val puntosFiltrados = puntos3D
+            .map { Triple(it.first * factorEscalado, it.second * factorEscalado, it.third * factorEscalado) }
+            .filter { (x, y, z) ->
+                val magnitud = Math.sqrt(x * x + y * y + z * z)
+                x.isFinite() && y.isFinite() && z.isFinite() &&
+                        z > 0.01 && magnitud > 0.05
+            }
+
         val outFile = File("C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\keypoints.ply")
         val writer = outFile.printWriter()
         writer.println("ply")
         writer.println("format ascii 1.0")
-        writer.println("element vertex ${puntos3D.size}")
+        writer.println("element vertex ${puntosFiltrados.size}")
         writer.println("property float x")
         writer.println("property float y")
         writer.println("property float z")
         writer.println("end_header")
-        puntos3D.forEach { (x, y, z) -> writer.println("$x $y $z") }
+        puntosFiltrados.forEach { (x, y, z) -> writer.println("$x $y $z") }
         writer.close()
-        println("📄 Archivo .ply combinado generado con ${puntos3D.size} puntos.")
+
+        println("📄 Archivo filtrado y escalado generado con ${puntosFiltrados.size} puntos.")
     }
 }
