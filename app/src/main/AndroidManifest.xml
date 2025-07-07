@@ -25,7 +25,9 @@
         >
         <meta-data
             android:name="com.google.ar.core"
-            android:value="required" />
+            android:value="required"
+            tools:replace="android:value" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -38,6 +40,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".CaptureActivity" />
+        <activity android:name="com.example.procesamiento3d.MedicionActivity"
+            android:theme="@style/Theme.Medicion"/>
+
+
+
+
 
     </application>
 

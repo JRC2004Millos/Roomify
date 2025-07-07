@@ -72,4 +72,7 @@ dependencies {
 
     // OpenCV (Java bindings para Android)
     implementation(project(":sdk"))
+
+    //Procesamiento3d
+    implementation(project(":procesamiento3d"))
 }

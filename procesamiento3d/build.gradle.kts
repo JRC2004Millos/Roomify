@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.library")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -8,11 +8,11 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.procesamiento3d"
+        //applicationId = "com.example.procesamiento3d"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        //versionCode = 1
+        //versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.material)
     implementation(project(":sdk"))
     implementation(libs.junit.junit)
+    implementation("io.github.sceneview:arsceneview:0.9.7")
+    implementation("com.google.code.gson:gson:2.10.1")
     testImplementation("junit:junit:4.13.2")
     testImplementation(files("libs/opencv-480.jar"))
     androidTestImplementation(libs.androidx.junit)
