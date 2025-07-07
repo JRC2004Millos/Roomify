@@ -37,6 +37,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    bundle {
+        storeArchive {
+            enable = false
+        }
+    }
+
 }
 
 dependencies {
