@@ -1,4 +1,3 @@
-
 package com.example.procesamiento3d
 
 import android.content.Context
@@ -6,8 +5,12 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.camera.view.PreviewView
 import androidx.core.graphics.createBitmap
+import com.example.procesamiento3d.api.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import org.opencv.android.Utils
 import org.opencv.core.Mat
 import org.opencv.core.Size
@@ -38,19 +41,24 @@ object TextureProcessor {
         }
 
         // 4. Buscar textura más parecida
-        val textureName = TextureRecognizer.findMostSimilar(context, processedBitmap)
+        val textureName = enviarImagenAlServidor(context, processedBitmap)
 
         // 5. Guardar textura sugerida
         if (textureName != null) {
-            withContext(Dispatchers.IO) {
-                val textureFinalFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Albedo.png")
-                context.assets.open("textures/$textureName").use { input ->
-                    textureFinalFile.outputStream().use { output ->
-                        input.copyTo(output)
+            try {
+                withContext(Dispatchers.IO) {
+                    val textureFinalFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Albedo.png")
+                    context.assets.open("textures/$textureName").use { input ->
+                        textureFinalFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
                     }
+                    Log.d("TextureProcessor", "🎯 Textura sugerida: $textureName")
+                    Log.d("TextureProcessor", "📂 Guardada en: ${textureFinalFile.absolutePath}")
                 }
-                Log.d("TextureProcessor", "🎯 Textura sugerida: $textureName")
-                Log.d("TextureProcessor", "📂 Guardada en: ${textureFinalFile.absolutePath}")
+            } catch (e: Exception) {
+                Log.e("TextureProcessor", "❌ No se pudo copiar la textura desde assets: ${e.message}")
+                return Pair(processedBitmap, null)
             }
         }
 
@@ -85,18 +93,14 @@ object TextureProcessor {
     private fun procesarConOpenCV(bitmap: Bitmap): Bitmap {
         val src = Mat()
 
-        // Convertir de Bitmap a Mat
         Utils.bitmapToMat(bitmap, src)
 
-        // Verificar si está vacía
         if (src.empty()) {
             Log.e("OpenCV", "❌ Imagen de entrada está vacía.")
             return bitmap
         }
 
         val converted = Mat()
-
-        // Asegurar tipo correcto (3 canales)
         when (src.channels()) {
             4 -> Imgproc.cvtColor(src, converted, Imgproc.COLOR_RGBA2RGB)
             1 -> Imgproc.cvtColor(src, converted, Imgproc.COLOR_GRAY2RGB)
@@ -107,17 +111,41 @@ object TextureProcessor {
             }
         }
 
-        // Aplicar preprocesamiento
         val blurred = Mat()
         Imgproc.GaussianBlur(converted, blurred, Size(5.0, 5.0), 0.0)
 
         val filtered = Mat()
         Imgproc.bilateralFilter(blurred, filtered, 9, 75.0, 75.0)
 
-        // Convertir de vuelta a Bitmap
         val resultBitmap = createBitmap(filtered.cols(), filtered.rows(), Bitmap.Config.ARGB_8888)
         Utils.matToBitmap(filtered, resultBitmap)
 
         return resultBitmap
+    }
+}
+
+private suspend fun enviarImagenAlServidor(context: Context, bitmap: Bitmap): String? {
+    return withContext(Dispatchers.IO) {
+        try {
+            val file = File(context.cacheDir, "temp_upload.jpg")
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            }
+
+            val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+            val response = RetrofitClient.api.uploadImage(body)
+            if (response.isSuccessful) {
+                val texture = response.body()?.texture
+                Log.d("TextureProcessor", "✅ Servidor respondió: $texture")
+                return@withContext texture
+            } else {
+                Log.e("TextureProcessor", "❌ Error del servidor: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Log.e("TextureProcessor", "❌ Error al enviar imagen: ${e.message}")
+        }
+        return@withContext null
     }
 }

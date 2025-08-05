@@ -1,19 +1,15 @@
-// retrofit/TextureApiService.kt
-package com.example.procesamiento3d.retrofit
+package com.example.procesamiento3d.api
 
-import com.example.procesamiento3d.api.TextureResponse
 import okhttp3.MultipartBody
+import retrofit2.Response
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
-import retrofit2.Call
-import retrofit2.http.Headers
 
 interface TextureApiService {
     @Multipart
     @POST("predict/")
-    fun uploadImage(
-        @Part image: MultipartBody.Part
-    ): Call<TextureResponse>
+    suspend fun uploadImage(
+        @Part file: MultipartBody.Part
+    ): Response<TextureResponse>
 }
-

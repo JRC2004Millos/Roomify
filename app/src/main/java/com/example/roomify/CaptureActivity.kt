@@ -26,7 +26,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import android.util.Log
 
 class CaptureActivity : ComponentActivity() {
 
@@ -76,8 +77,6 @@ class CaptureActivity : ComponentActivity() {
                         .clickable {
                             val albedoFile =
                                 File(context.cacheDir, "${wall.label.replace(" ", "_")}_Albedo.png")
-                            val originalFile =
-                                File(context.cacheDir, "${wall.label.replace(" ", "_")}.jpg")
                             if (albedoFile.exists()) {
                                 val intent =
                                     Intent(context, PreviewTextureActivity::class.java).apply {
@@ -187,26 +186,31 @@ class CaptureActivity : ComponentActivity() {
 
                                         val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
 
-                                        val (processedBitmap, textureName) = TextureProcessor.procesarYCompararTextura(
+                                        // 🔄 Procesar, recortar, comparar y guardar resultados
+                                        val (_, textureName) = TextureProcessor.procesarYCompararTextura(
                                             context = context,
                                             previewView = previewView,
                                             originalBitmap = originalBitmap,
                                             wallName = wallName
                                         )
+                                        Log.d("CaptureActivity", "🎯 Resultado de textura sugerida: $textureName")
 
                                         withContext(Dispatchers.Main) {
                                             isProcessing = false
 
                                             if (textureName != null) {
+                                                val textureFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Albedo.png")
+                                                val processedFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Processed.jpg")
+
                                                 val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                                                    putExtra("texturePath", File(context.cacheDir, "${wallName.replace(" ", "_")}_Albedo.png").absolutePath)
-                                                    putExtra("processedPath", File(context.cacheDir, "${wallName.replace(" ", "_")}_Processed.jpg").absolutePath)
+                                                    putExtra("texturePath", textureFile.absolutePath)
+                                                    putExtra("processedPath", processedFile.absolutePath)
                                                     putExtra("wallName", wallName)
                                                 }
                                                 context.startActivity(intent)
                                                 if (context is ComponentActivity) context.finish()
                                             } else {
-                                                Toast.makeText(context, "❌ No se encontró textura similar", Toast.LENGTH_LONG).show()
+                                                Toast.makeText(context, "❌ No se recibió textura", Toast.LENGTH_LONG).show()
                                             }
                                         }
                                     }
