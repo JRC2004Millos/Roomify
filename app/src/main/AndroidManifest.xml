@@ -8,6 +8,8 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -41,6 +43,11 @@
         <activity android:name=".CaptureActivity" />
         <activity android:name=".LibreriaActivity" />
         <activity android:name=".CargaActivity" />
+
+        <activity
+            android:name=".MainActivityYolo"
+            android:exported="true">
+        </activity>
 
 
 

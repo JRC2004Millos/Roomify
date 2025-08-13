@@ -41,13 +41,13 @@ android {
 
 dependencies {
     // CameraX
-    val camerax_version = "1.3.0"
-    implementation("androidx.camera:camera-core:$camerax_version")
-    implementation("androidx.camera:camera-camera2:$camerax_version")
-    implementation("androidx.camera:camera-lifecycle:$camerax_version")
-    implementation("androidx.camera:camera-view:$camerax_version")
-    implementation("androidx.camera:camera-extensions:$camerax_version")
-    implementation("androidx.compose.material:material-icons-extended")
+    //val camerax_version = "1.3.0"
+    //implementation("androidx.camera:camera-core:$camerax_version")
+    //implementation("androidx.camera:camera-camera2:$camerax_version")
+    //implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    //implementation("androidx.camera:camera-view:$camerax_version")
+    //implementation("androidx.camera:camera-extensions:$camerax_version")
+    //implementation("androidx.compose.material:material-icons-extended")
 
 
     implementation(libs.androidx.core.ktx)
@@ -71,4 +71,16 @@ dependencies {
 
     // OpenCV (Java bindings para Android)
     implementation(project(":sdk"))
+
+    implementation ("androidx.camera:camera-core:1.3.4")
+    implementation ("androidx.camera:camera-camera2:1.3.4")
+    implementation ("androidx.camera:camera-lifecycle:1.3.4")
+    implementation ("androidx.camera:camera-view:1.3.4")
+
+    // TFLite
+    implementation("org.tensorflow:tensorflow-lite:2.13.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.13.0") // GPU clásico
+
+    // Material (para FABs)
+    implementation ("com.google.android.material:material:1.12.0")
 }
