@@ -16,6 +16,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Agrega soporte para Unity
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a"))
+        }
     }
 
     buildTypes {
@@ -27,19 +32,41 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
+    }
+
+    // Packaging options para Unity y ARCore
+    packaging {
+        jniLibs {
+            pickFirsts.add("**/libc++_shared.so")
+            pickFirsts.add("**/libopenxr_loader.so")
+            useLegacyPackaging = true
+        }
+        resources {
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+        }
     }
 }
 
 dependencies {
+    // Unity Library - debe estar primero
+    implementation(project(":unityLibrary"))
+
     // CameraX
     val camerax_version = "1.3.0"
     implementation("androidx.camera:camera-core:$camerax_version")
@@ -49,7 +76,6 @@ dependencies {
     implementation("androidx.camera:camera-extensions:$camerax_version")
     implementation("androidx.compose.material:material-icons-extended")
 
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -58,6 +84,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,9 +93,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // ARCore
-    implementation("com.google.ar:core:1.42.0")
+    // ❌ COMENTAR O ELIMINAR - Unity ya incluye ARCore
+    // implementation("com.google.ar:core:1.42.0")
+    implementation(project(":unityLibrary"))
+    implementation("androidx.games:games-activity:3.0.5")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.activity:activity-ktx:1.7.2")
+    implementation("com.google.android.material:material:1.9.0")
 
-    // OpenCV (Java bindings para Android)
+    // OpenCV
     implementation(project(":sdk"))
 }

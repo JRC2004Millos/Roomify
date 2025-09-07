@@ -11,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
@@ -20,9 +21,15 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Roomify"
-include(":app")
 
-val opencvsdk = file("sdk")
-include(":app", ":sdk")
-project(":sdk").projectDir = opencvsdk
+// Módulos principales
+include(":app")
 include(":sdk")
+include(":unityLibrary")
+project(":unityLibrary").projectDir = file("unityLibrary")
+
+// Configuración de SDK
+val opencvsdk = file("sdk")
+project(":sdk").projectDir = opencvsdk
+
+// Unity Library está en la ubicación por defecto (./unityLibrary)

@@ -110,7 +110,8 @@ class MainActivity : ComponentActivity() {
 
                         Button(
                             onClick = {
-                                startActivity(Intent(this@MainActivity, CaptureActivity::class.java))
+                                // Cambiar esta línea para abrir Unity
+                                startActivity(Intent(this@MainActivity, UnityActivity::class.java))
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp)
