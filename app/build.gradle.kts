@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Si NO usas Compose en MedicionActivity puedes dejar compose, no estorba
     alias(libs.plugins.kotlin.compose)
 }
 
@@ -14,7 +15,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -27,29 +27,31 @@ android {
             )
         }
     }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+    kotlinOptions { jvmTarget = "17" }
+
     buildFeatures {
         compose = true
     }
 }
 
 dependencies {
-    // CameraX
+    implementation(libs.androidx.appcompat)
+
+    // CameraX (ok)
     val camerax_version = "1.3.0"
     implementation("androidx.camera:camera-core:$camerax_version")
     implementation("androidx.camera:camera-camera2:$camerax_version")
     implementation("androidx.camera:camera-lifecycle:$camerax_version")
     implementation("androidx.camera:camera-view:$camerax_version")
     implementation("androidx.camera:camera-extensions:$camerax_version")
+
+    // Compose
     implementation("androidx.compose.material:material-icons-extended")
-
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,9 +68,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // ARCore
-    implementation("com.google.ar:core:1.42.0")
+    // ✅ usa ARSceneView (0.9.7 para que case con el código que te pasé)
+    implementation("io.github.sceneview:arsceneview:0.9.7")
 
-    // OpenCV (Java bindings para Android)
+    // ✅ ARCore (UNA sola vez; deja la más reciente estable)
+    implementation("com.google.ar:core:1.45.0")
+
+    implementation ("com.google.android.material:material:1.12.0")
+
+
+    // OpenCV como módulo local (ok)
     implementation(project(":sdk"))
 }

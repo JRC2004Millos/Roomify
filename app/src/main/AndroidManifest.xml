@@ -25,7 +25,7 @@
         >
         <meta-data
             android:name="com.google.ar.core"
-            android:value="required" />
+            android:value="optional" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -41,8 +41,9 @@
         <activity android:name=".CaptureActivity" />
         <activity android:name=".LibreriaActivity" />
         <activity android:name=".CargaActivity" />
-
-
+        <activity
+            android:name=".MedicionActivity"
+            android:exported="false" />
 
     </application>
 

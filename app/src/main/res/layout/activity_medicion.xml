@@ -1,0 +1,51 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Vista AR -->
+    <io.github.sceneview.ar.ArSceneView
+        android:id="@+id/arSceneView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.example.roomify.ar.LineOverlayView
+        android:id="@+id/lineOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"/>
+
+    <!-- Retícula fija al centro (solo UI) -->
+    <View
+        android:id="@+id/crosshair"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        android:background="@drawable/crosshair_drawable" />
+
+    <!-- Botón + para colocar puntos -->
+    <ImageButton
+        android:id="@+id/btnAddPoint"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/btn_circle_bg"
+        android:contentDescription="Agregar punto"
+        android:src="@drawable/ic_add" />
+
+    <!-- Texto de distancia -->
+    <TextView
+        android:id="@+id/tvDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="24dp"
+        android:text="0.00 m"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:background="#66000000"
+        android:padding="8dp"/>
+
+</FrameLayout>
