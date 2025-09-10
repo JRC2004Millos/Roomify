@@ -16,28 +16,54 @@ class MeasurementController(
 ) {
     private val snapPx2 = snapPx * snapPx
 
+    // Matrices y buffers para proyección
     private val proj = FloatArray(16)
     private val view = FloatArray(16)
     private val viewProj = FloatArray(16)
     private val worldPoint = FloatArray(4)
     private val clip = FloatArray(4)
 
+    // Estado
     val anchors = mutableListOf<Anchor>()
     private val screenPts = mutableListOf<Pair<Float, Float>>()
+
+    // Checkpoints: tamaños confirmados de anchors (como “commits”)
+    private val checkpoints = ArrayDeque<Int>().apply { addLast(0) }
+
     var snapCandidateIndex = -1
         private set
+
+    // -------- API --------
 
     fun clear() {
         anchors.toSet().forEach { it.detach() }
         anchors.clear()
         screenPts.clear()
         snapCandidateIndex = -1
+        checkpoints.clear()
+        checkpoints.addLast(0)
     }
 
     fun placePointFromCenterHit(hit: HitResult) {
         val anchor = if (snapCandidateIndex >= 0) anchors[snapCandidateIndex] else hit.createAnchor()
         anchors += anchor
     }
+
+    fun confirm() {
+        checkpoints.addLast(anchors.size)
+    }
+
+    fun undoLast(): Boolean {
+        val floor = checkpoints.lastOrNull() ?: 0
+        if (anchors.size > floor) {
+            val last = anchors.removeLast()
+            last.detach()
+            return true
+        }
+        return false
+    }
+
+    fun getConfirmedCount(): Int = checkpoints.lastOrNull() ?: 0
 
     fun distanceMeters(a: Pose, b: Pose): Double {
         val dx = a.tx() - b.tx()
@@ -50,12 +76,12 @@ class MeasurementController(
         frame: Frame,
         vw: Int,
         vh: Int,
-        hitAtCenter: (() -> HitResult?) // pásame un lambda que retorne el hit central
+        hitAtCenter: (() -> HitResult?)
     ): UiState {
         val cam = frame.camera
         if (vw <= 0 || vh <= 0) return UiState(emptyList(), null, null, trackingOk = false)
 
-        // reproyecta anchors
+        // 1) Reproyectar anchors fijos
         val pts = mutableListOf<Pair<Float, Float>>()
         for (anc in anchors) {
             val p = anc.pose
@@ -64,6 +90,7 @@ class MeasurementController(
         screenPts.clear()
         screenPts.addAll(pts)
 
+        // 2) Preview + SNAP
         var preview: Pair<Float, Float>? = null
         var snap: Pair<Float, Float>? = null
         snapCandidateIndex = -1
@@ -74,7 +101,7 @@ class MeasurementController(
                 val pose = hit.hitPose
                 preview = worldToScreen(cam, pose.tx(), pose.ty(), pose.tz(), vw, vh)
 
-                // snap al primero si está cerca en px
+                // Snap al primero por proximidad en px
                 if (preview != null && screenPts.isNotEmpty()) {
                     val first = screenPts.first()
                     val d2 = dist2(preview!!, first)
@@ -84,7 +111,7 @@ class MeasurementController(
                     }
                 }
 
-                // snap al punto más cercano si además está cerca en mundo
+                // Snap al punto más cercano (px) + validación en mundo (m)
                 if (preview != null && snap == null && screenPts.isNotEmpty()) {
                     val (px, py) = preview!!
                     var bestIdx = -1
@@ -95,6 +122,7 @@ class MeasurementController(
                         val d = kotlin.math.sqrt(dx*dx + dy*dy)
                         if (d < bestPxDist) { bestPxDist = d; bestIdx = idx }
                     }
+
                     val worldOK = anchors.getOrNull(bestIdx)?.let { anc ->
                         val ap = anc.pose
                         val dx = ap.tx() - pose.tx()
@@ -121,6 +149,12 @@ class MeasurementController(
         )
     }
 
+    fun projectToScreen(
+        cam: Camera, wx: Float, wy: Float, wz: Float, vw: Int, vh: Int
+    ): Pair<Float, Float>? = worldToScreen(cam, wx, wy, wz, vw, vh)
+
+    // -------- helpers internos --------
+
     private fun worldToScreen(
         cam: Camera, wx: Float, wy: Float, wz: Float, vw: Int, vh: Int
     ): Pair<Float, Float>? {
@@ -146,11 +180,5 @@ class MeasurementController(
         val dx = a.first - b.first
         val dy = a.second - b.second
         return dx*dx + dy*dy
-    }
-
-    fun projectToScreen(
-        cam: Camera, wx: Float, wy: Float, wz: Float, vw: Int, vh: Int
-    ): Pair<Float, Float>? {
-        return worldToScreen(cam, wx, wy, wz, vw, vh)
     }
 }

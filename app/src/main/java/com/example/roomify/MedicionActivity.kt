@@ -24,20 +24,28 @@ class MedicionActivity : AppCompatActivity() {
     private lateinit var lineOverlay: LineOverlayView
 
     private val ui = Handler(Looper.getMainLooper())
+
     private var previewRunning = false
 
     private val measure = MeasurementController()
     private val planePolyCache = linkedMapOf<com.google.ar.core.Plane, List<Pair<Float, Float>>>()
+    private lateinit var btnUndoPoint: ImageButton
+    private lateinit var btnConfirm: ImageButton
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_medicion)
 
+        // 1) findViewById primero
         lineOverlay = findViewById(R.id.lineOverlay)
         arSceneView = findViewById(R.id.arSceneView)
         tvDistance = findViewById(R.id.tvDistance)
         btnAddPoint = findViewById(R.id.btnAddPoint)
+        btnUndoPoint = findViewById(R.id.btnUndoPoint)
+        btnConfirm = findViewById(R.id.btnConfirm)
 
+        // 2) Configurar sesión AR
         arSceneView.configureSession { session, config ->
             config.planeFindingMode = Config.PlaneFindingMode.HORIZONTAL_AND_VERTICAL
             config.depthMode = if (session.isDepthModeSupported(Config.DepthMode.AUTOMATIC))
@@ -46,10 +54,25 @@ class MedicionActivity : AppCompatActivity() {
             session.configure(config)
         }
 
-        // Malla integrada (visibilidad la controlamos en el tick)
+        // 3) Desactivar renderer integrado (dibujamos nuestras mallas)
         arSceneView.planeRenderer.isVisible = false
 
+        // 4) Listeners (una sola vez cada uno)
         btnAddPoint.setOnClickListener { placePointAtCenter() }
+
+        btnUndoPoint.setOnClickListener {
+            if (measure.undoLast()) {
+                tvDistance.text = "Último punto deshecho"
+            } else {
+                tvDistance.text = "No hay puntos por deshacer"
+            }
+            if (!previewRunning) startPreviewLoop()
+        }
+
+        btnConfirm.setOnClickListener {
+            measure.confirm()
+            tvDistance.text = "Segmentos confirmados"
+        }
     }
 
     override fun onResume() { super.onResume(); arSceneView.onResume(this) }
