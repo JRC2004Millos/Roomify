@@ -16,13 +16,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        flatDir {
+            dirs("$rootDir/unityLibrary/libs")
+        }
     }
 }
 
 rootProject.name = "Roomify"
 include(":app")
-
-val opencvsdk = file("sdk")
-include(":app", ":sdk")
-project(":sdk").projectDir = opencvsdk
-include(":sdk")
+include(":unityLibrary")

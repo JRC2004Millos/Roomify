@@ -110,7 +110,7 @@ class MainActivity : ComponentActivity() {
 
                         Button(
                             onClick = {
-                                startActivity(Intent(this@MainActivity, CaptureActivity::class.java))
+                                startActivity(Intent(this@MainActivity, com.unity3d.player.UnityPlayerActivity::class.java))
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp)

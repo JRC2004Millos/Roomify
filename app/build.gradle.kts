@@ -14,6 +14,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        ndk {abiFilters += "arm64-v8a"}
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -66,9 +67,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // ARCore
-    implementation("com.google.ar:core:1.42.0")
-
-    // OpenCV (Java bindings para Android)
-    implementation(project(":sdk"))
+    implementation(project(":unityLibrary"))
 }
