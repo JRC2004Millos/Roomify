@@ -70,6 +70,7 @@ dependencies {
 
     // ✅ usa ARSceneView (0.9.7 para que case con el código que te pasé)
     implementation("io.github.sceneview:arsceneview:0.9.7")
+    implementation ("com.google.code.gson:gson:2.10.1")
 
     // ✅ ARCore (UNA sola vez; deja la más reciente estable)
     implementation("com.google.ar:core:1.45.0")

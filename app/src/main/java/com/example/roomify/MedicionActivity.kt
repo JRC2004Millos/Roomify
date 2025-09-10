@@ -1,24 +1,20 @@
 package com.example.roomify
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.roomify.ar.LineOverlayView
-import com.google.ar.core.Anchor
+import com.example.roomify.core.MeasurementController
+import com.example.roomify.core.RoomExporter
 import com.google.ar.core.Config
-import com.google.ar.core.Plane
-import com.google.ar.core.Point
-import com.google.ar.core.Pose
-import io.github.sceneview.ar.ArSceneView
-import kotlin.math.sqrt
-import java.util.Locale
-import android.os.Handler
-import android.os.Looper
-import android.opengl.Matrix
-import com.google.ar.core.Camera
-import com.google.ar.core.TrackingState
 import com.google.ar.core.HitResult
+import com.google.ar.core.TrackingState
+import io.github.sceneview.ar.ArSceneView
+import java.util.Locale
 
 class MedicionActivity : AppCompatActivity() {
 
@@ -26,17 +22,12 @@ class MedicionActivity : AppCompatActivity() {
     private lateinit var tvDistance: TextView
     private lateinit var btnAddPoint: ImageButton
     private lateinit var lineOverlay: LineOverlayView
+
     private val ui = Handler(Looper.getMainLooper())
-
-    private val proj = FloatArray(16)
-    private val view = FloatArray(16)
-    private val viewProj = FloatArray(16)
-    private val worldPoint = FloatArray(4)
-    private val clip = FloatArray(4)
-
     private var previewRunning = false
-    private var firstAnchor: Anchor? = null
-    private var secondAnchor: Anchor? = null
+
+    private val measure = MeasurementController()
+    private val planePolyCache = linkedMapOf<com.google.ar.core.Plane, List<Pair<Float, Float>>>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,204 +46,103 @@ class MedicionActivity : AppCompatActivity() {
             session.configure(config)
         }
 
+        // Malla integrada (visibilidad la controlamos en el tick)
+        arSceneView.planeRenderer.isVisible = false
+
         btnAddPoint.setOnClickListener { placePointAtCenter() }
     }
 
-    override fun onResume() {
-        super.onResume()
-        arSceneView.onResume(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        arSceneView.onPause(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        arSceneView.destroy()
-    }
+    override fun onResume() { super.onResume(); arSceneView.onResume(this) }
+    override fun onPause() { super.onPause(); arSceneView.onPause(this) }
+    override fun onDestroy() { super.onDestroy(); arSceneView.destroy() }
 
     private fun placePointAtCenter() {
         val frame = arSceneView.arSession?.update() ?: return
-        val vw = arSceneView.width
-        val vh = arSceneView.height
+        val vw = arSceneView.width; val vh = arSceneView.height
         if (vw <= 0 || vh <= 0) return
 
-        val cx = vw / 2f
-        val cy = vh / 2f
-        val cam = frame.camera
+        val hit = hitTestAtCenter(frame, vw/2f, vh/2f) ?: return
+        measure.placePointFromCenterHit(hit)
 
-        val hit = hitTestAtCenterRobust(frame, cx, cy) ?: run {
-            lineOverlay.previewScreenX = null
-            lineOverlay.previewScreenY = null
-            lineOverlay.invalidate()
-            return
-        }
+        // Distancia del último tramo (UI)
+        val n = measure.anchors.size
+        tvDistance.text = if (n >= 2) {
+            val a = measure.anchors[n-2].pose
+            val b = measure.anchors[n-1].pose
+            String.format(Locale.US, "%.2f m", measure.distanceMeters(a,b))
+        } else "0.00 m"
 
-        val pose = hit.hitPose
-        worldToScreen(cam, pose.tx(), pose.ty(), pose.tz(), vw, vh)?.let { (sx, sy) ->
-            lineOverlay.previewScreenX = sx
-            lineOverlay.previewScreenY = sy
-        }
-
-        val newAnchor = hit.createAnchor()
-
-        if (firstAnchor == null) {
-            firstAnchor = newAnchor
-            firstAnchor?.pose?.let { p ->
-                worldToScreen(cam, p.tx(), p.ty(), p.tz(), vw, vh)?.let { (sx, sy) ->
-                    lineOverlay.firstScreenX = sx
-                    lineOverlay.firstScreenY = sy
-                    lineOverlay.previewScreenX = null
-                    lineOverlay.previewScreenY = null
-                    lineOverlay.invalidate()
-                }
-            }
-            startPreviewLoop()
-
-        } else if (secondAnchor == null) {
-            secondAnchor = newAnchor
-            secondAnchor?.pose?.let { p2 ->
-                worldToScreen(cam, p2.tx(), p2.ty(), p2.tz(), vw, vh)?.let { (sx, sy) ->
-                    lineOverlay.secondScreenX = sx
-                    lineOverlay.secondScreenY = sy
-                    lineOverlay.invalidate()
-                }
-            }
-            val d = distanceMeters(firstAnchor!!.pose, secondAnchor!!.pose)
-            tvDistance.text = String.format(Locale.US, "%.2f m", d)
-
-        } else {
-            clearLastMeasurement()
-            firstAnchor = newAnchor
-            firstAnchor?.pose?.let { p ->
-                worldToScreen(cam, p.tx(), p.ty(), p.tz(), vw, vh)?.let { (sx, sy) ->
-                    lineOverlay.firstScreenX = sx
-                    lineOverlay.firstScreenY = sy
-                    lineOverlay.previewScreenX = null
-                    lineOverlay.previewScreenY = null
-                    lineOverlay.secondScreenX = null
-                    lineOverlay.secondScreenY = null
-                    lineOverlay.invalidate()
-                }
-            }
-            tvDistance.text = "0.00 m"
-            startPreviewLoop()
-        }
+        startPreviewLoop()
     }
 
-    private fun worldToScreen(
-        cam: Camera,
-        wx: Float, wy: Float, wz: Float,
-        vw: Int, vh: Int
-    ): Pair<Float, Float>? {
-        cam.getProjectionMatrix(proj, 0, 0.01f, 100f)
-        cam.getViewMatrix(view, 0)
-        Matrix.multiplyMM(viewProj, 0, proj, 0, view, 0)
+    private fun startPreviewLoop() { if (!previewRunning) { previewRunning = true; ui.post(tick) } }
+    private fun stopPreviewLoop() { previewRunning = false }
 
-        worldPoint[0] = wx; worldPoint[1] = wy; worldPoint[2] = wz; worldPoint[3] = 1f
-        Matrix.multiplyMV(clip, 0, viewProj, 0, worldPoint, 0)
-
-        val w = clip[3]
-        if (w == 0f) return null
-
-        val ndcX = clip[0] / w
-        val ndcY = clip[1] / w
-        val ndcZ = clip[2] / w
-        if (ndcZ < -1f || ndcZ > 1f) return null
-
-        val sx = ((ndcX + 1f) * 0.5f) * vw
-        val sy = ((1f - (ndcY + 1f) * 0.5f)) * vh
-        return sx to sy
-    }
-
-    private fun distanceMeters(p1: Pose, p2: Pose): Double {
-        val dx = p1.tx() - p2.tx()
-        val dy = p1.ty() - p2.ty()
-        val dz = p1.tz() - p2.tz()
-        return sqrt((dx*dx + dy*dy + dz*dz).toDouble())
-    }
-
-    private fun clearLastMeasurement() {
-        firstAnchor?.detach()
-        secondAnchor?.detach()
-        firstAnchor = null
-        secondAnchor = null
-        lineOverlay.clearAll()
-        stopPreviewLoop()
-    }
-
-    private fun startPreviewLoop() {
-        if (previewRunning) return
-        previewRunning = true
-        ui.post(previewTick)
-    }
-
-    private fun stopPreviewLoop() {
-        previewRunning = false
-    }
-
-    private val previewTick = object : Runnable {
+    private val tick = object: Runnable {
         override fun run() {
             if (!previewRunning) return
+
             val session = arSceneView.arSession
             val vw = arSceneView.width
             val vh = arSceneView.height
 
             if (session != null && vw > 0 && vh > 0) {
+                // 1) Actualizar frame/cámara UNA sola vez
                 val frame = session.update()
                 val cam = frame.camera
 
-                if (cam.trackingState != TrackingState.TRACKING) {
-                    ui.postDelayed(this, 50L)
-                    return
+                // 2) ACTUALIZAR MALLAS PERSISTENTES DE PLANOS (cache)
+                // 2.1) Eliminar planos STOPPED o SUBSUMED
+                val toRemove = mutableListOf<com.google.ar.core.Plane>()
+                for ((pl, _) in planePolyCache) {
+                    if (pl.trackingState == TrackingState.STOPPED || pl.subsumedBy != null) {
+                        toRemove += pl
+                    }
                 }
+                toRemove.forEach { planePolyCache.remove(it) }
 
-                when {
-                    firstAnchor != null && secondAnchor == null -> {
-                        firstAnchor?.pose?.let { p1 ->
-                            worldToScreen(cam, p1.tx(), p1.ty(), p1.tz(), vw, vh)?.let { (sx, sy) ->
-                                lineOverlay.firstScreenX = sx
-                                lineOverlay.firstScreenY = sy
-                            }
-                        }
+                // 2.2) Recorrer TODOS los planes conocidos por la sesión y proyectarlos a pantalla
+                val allPlanes = arSceneView.arSession
+                    ?.getAllTrackables(com.google.ar.core.Plane::class.java)
+                    .orEmpty()
 
-                        val cx = vw / 2f
-                        val cy = vh / 2f
-                        val hit = hitTestAtCenterRobust(frame, cx, cy)
-                        if (hit != null) {
-                            val pose = hit.hitPose
-                            worldToScreen(cam, pose.tx(), pose.ty(), pose.tz(), vw, vh)?.let { (sx, sy) ->
-                                lineOverlay.previewScreenX = sx
-                                lineOverlay.previewScreenY = sy
-                            }
-                        } else {
-                            lineOverlay.previewScreenX = null
-                            lineOverlay.previewScreenY = null
-                        }
+                for (plane in allPlanes) {
+                    if (plane.trackingState == TrackingState.STOPPED || plane.subsumedBy != null) continue
+
+                    val polyBuf = plane.polygon ?: continue
+                    val centerPose = plane.centerPose
+
+                    val screenPoly = ArrayList<Pair<Float, Float>>(polyBuf.limit() / 2)
+                    polyBuf.rewind()
+                    while (polyBuf.hasRemaining()) {
+                        val px = polyBuf.get()
+                        val pz = polyBuf.get()
+                        val local = floatArrayOf(px, 0f, pz)
+                        val world = FloatArray(3)
+                        centerPose.transformPoint(local, 0, world, 0)
+                        measure.projectToScreen(cam, world[0], world[1], world[2], vw, vh)?.let { screenPoly += it }
                     }
 
-                    firstAnchor != null && secondAnchor != null -> {
-                        firstAnchor?.pose?.let { p1 ->
-                            worldToScreen(cam, p1.tx(), p1.ty(), p1.tz(), vw, vh)?.let { (sx, sy) ->
-                                lineOverlay.firstScreenX = sx
-                                lineOverlay.firstScreenY = sy
-                            }
-                        }
-                        secondAnchor?.pose?.let { p2 ->
-                            worldToScreen(cam, p2.tx(), p2.ty(), p2.tz(), vw, vh)?.let { (sx, sy) ->
-                                lineOverlay.secondScreenX = sx
-                                lineOverlay.secondScreenY = sy
-                            }
-                        }
-                        lineOverlay.previewScreenX = null
-                        lineOverlay.previewScreenY = null
+                    if (screenPoly.size >= 3) {
+                        planePolyCache[plane] = screenPoly
                     }
-
-                    else -> lineOverlay.clearAll()
                 }
 
+                // 2.3) Pintar TODAS las mallas persistentes
+                lineOverlay.setPlanePolygons(planePolyCache.values.toList())
+
+                // 3) Medición: reproyección + preview + snap (usa el mismo frame)
+                val state = measure.tick(frame, vw, vh) {
+                    hitTestAtCenter(frame, vw / 2f, vh / 2f)
+                }
+
+                // (Si quisieras ocultar la malla integrada según tracking, la dejamos OFF de todos modos)
+                arSceneView.planeRenderer.isVisible = false
+
+                // 4) Dibujar overlay de líneas/puntos
+                lineOverlay.setPoints(state.screenPoints)
+                lineOverlay.setPreview(state.previewPoint)
+                lineOverlay.setSnap(state.snapPoint)
                 lineOverlay.invalidate()
             }
 
@@ -260,61 +150,41 @@ class MedicionActivity : AppCompatActivity() {
         }
     }
 
-    // --- NUEVA LÓGICA DE HIT TEST ---
-    private fun hitTestAtCenterRobust(
-        frame: com.google.ar.core.Frame,
-        cx: Float,
-        cy: Float
-    ): HitResult? {
+    // Hit test (preferente Depth > Vertical > Point > Horizontal)
+    private fun hitTestAtCenter(frame: com.google.ar.core.Frame, cx: Float, cy: Float): HitResult? {
         val results = frame.hitTest(cx, cy)
+        var depth: HitResult? = null
+        var vert: HitResult? = null
+        var horiz: HitResult? = null
+        var point: HitResult? = null
 
-        var depthHit: HitResult? = null
-        var verticalPlaneHit: HitResult? = null
-        var horizontalPlaneHit: HitResult? = null
-        var pointHit: HitResult? = null
-
-        // Filtra los resultados para priorizar los que tienen un estado de seguimiento confiable.
-        val validResults = results.filter { it.trackable.trackingState == TrackingState.TRACKING }
-
-        for (r in validResults) {
-            when (val t = r.trackable) {
-                is com.google.ar.core.DepthPoint -> {
-                    if (depthHit == null) depthHit = r
-                }
-                is com.google.ar.core.Plane -> {
-                    when (t.type) {
-                        com.google.ar.core.Plane.Type.VERTICAL -> {
-                            // Prioriza el plano vertical si lo encuentras.
-                            if (verticalPlaneHit == null) {
-                                verticalPlaneHit = r
-                            }
-                        }
-                        com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING,
-                        com.google.ar.core.Plane.Type.HORIZONTAL_DOWNWARD_FACING -> {
-                            // Prioriza el plano horizontal si lo encuentras y cumple con el polígono.
-                            if (t.isPoseInPolygon(r.hitPose) && horizontalPlaneHit == null) {
-                                horizontalPlaneHit = r
-                            }
-                        }
-                    }
-                }
-                is com.google.ar.core.Point -> {
-                    if (pointHit == null) {
-                        // Filtra puntos que estén muy lejos.
-                        if (r.hitPose.translation.size >= 3) {
-                            val pose = r.hitPose.translation
-                            val distance = sqrt(pose[0] * pose[0] + pose[1] * pose[1] + pose[2] * pose[2])
-                            if (distance < 3.0f) { // Considera puntos a menos de 3 metros
-                                pointHit = r
-                            }
-                        }
-                    }
-                }
+        val valid = results.filter { it.trackable.trackingState == TrackingState.TRACKING }
+        for (r in valid) when (val t = r.trackable) {
+            is com.google.ar.core.DepthPoint -> if (depth == null) depth = r
+            is com.google.ar.core.Plane -> when (t.type) {
+                com.google.ar.core.Plane.Type.VERTICAL -> if (vert == null) vert = r
+                com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING,
+                com.google.ar.core.Plane.Type.HORIZONTAL_DOWNWARD_FACING ->
+                    if (t.isPoseInPolygon(r.hitPose) && horiz == null) horiz = r
+            }
+            is com.google.ar.core.Point -> if (point == null) {
+                val tr = r.hitPose.translation
+                val d = kotlin.math.sqrt(tr[0]*tr[0] + tr[1]*tr[1] + tr[2]*tr[2])
+                if (d < 3.0f) point = r
             }
         }
+        return depth ?: vert ?: point ?: horiz
+    }
 
-        // Orden de preferencia: Depth > VerticalPlane > Point > HorizontalPlane
-        // Priorizamos el punto por encima del plano horizontal para capturar techos y paredes lisas.
-        return depthHit ?: verticalPlaneHit ?: pointHit ?: horizontalPlaneHit
+    // Botón exportar (android:onClick="onExportClick")
+    fun onExportClick(@Suppress("UNUSED_PARAMETER") v: View) {
+        if (measure.anchors.size < 3) {
+            tvDistance.text = "Necesitas mínimo 3 puntos para exportar."
+            return
+        }
+        // TODO: reemplazar por altura real cuando la midas
+        val altura = 2.80f
+        val path = RoomExporter.export(this, altura, measure.anchors)
+        tvDistance.text = "JSON exportado:\n$path"
     }
 }
