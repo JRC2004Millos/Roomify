@@ -41,9 +41,10 @@
         <activity
             android:name=".LibreriaActivity"
             android:exported="true" />
-        <activity android:name=".PreviewTextureActivity" />
-        <activity android:name=".LibreriaActivity" />
-        <activity android:name=".CargaActivity" />
+        <activity
+            android:name=".PreviewTextureActivity" />
+        <activity
+            android:name=".CargaActivity" />
 
     </application>
 

@@ -13,6 +13,8 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/procesamiento3d" />
             <option value="$PROJECT_DIR$/sdk" />
+            <option value="$PROJECT_DIR$/unityLibrary" />
+            <option value="$PROJECT_DIR$/unityLibrary/xrmanifest.androidlib" />
           </set>
         </option>
       </GradleProjectSettings>

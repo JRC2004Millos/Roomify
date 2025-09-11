@@ -82,9 +82,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-        // ARCore
-    implementation("com.google.ar:core:1.42.0")
-
     // OpenCV (Java bindings para Android)
     implementation(project(":sdk"))
 
