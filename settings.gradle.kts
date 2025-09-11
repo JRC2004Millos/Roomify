@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "Roomify"
 include(":app")
 include(":unityLibrary")
+include(":unityLibrary:xrmanifest.androidlib")

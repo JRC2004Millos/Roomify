@@ -2,33 +2,38 @@ apply plugin: 'com.android.library'
 apply from: '../shared/keepUnitySymbols.gradle'
 
 ext {
-    // Ruta al NDK embebido de Unity (ajústala si tu Editor está en otra carpeta)
-    UNITY_NDK_PATH = "C:/Program Files/Unity/Hub/Editor/6000.1.7f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK".replace('\\','/')
+    // Se pueden sobrescribir con -PUNITY_IL2CPP_PATH=... -PUNITY_NDK_PATH=...
+    UNITY_IL2CPP_PATH = (project.hasProperty('UNITY_IL2CPP_PATH')
+            ? project.property('UNITY_IL2CPP_PATH')
+            : "C:/Program Files/Unity/Hub/Editor/6000.1.7f1/Editor/Data/il2cpp/build/deploy/il2cpp.exe"
+    ).replace('\\','/')
+
+    UNITY_NDK_PATH = (project.hasProperty('UNITY_NDK_PATH')
+            ? project.property('UNITY_NDK_PATH')
+            : "C:/Program Files/Unity/Hub/Editor/6000.1.7f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
+    ).replace('\\','/')
 }
 
 // Para que Gradle encuentre los .aar exportados por Unity
 repositories {
     flatDir { dirs 'libs' }
 }
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(name: 'arcore_client', ext:'aar')
     implementation(name: 'ARPresto', ext:'aar')
     implementation(name: 'UnityARCore', ext:'aar')
     implementation(name: 'unityandroidpermissions', ext:'aar')
-    //implementation project(':unityLibrary:xrmanifest.androidlib')
+    // implementation project(':unityLibrary:xrmanifest.androidlib') // solo si existe
 }
 
 android {
     namespace "com.unity3d.player"
 
-    // Alineado con tu app
     compileSdk 35
 
-    // ¡NO usar ndkVersion ni ndkPath aquí! (eso fuerza a buscar el NDK del SDK)
-    // ndkVersion "27.2.12479018"  // <-- quitar
-    // ndkPath "..."               // <-- quitar
-
+    // No pongas ndkVersion/ndkPath aquí (usamos el del Editor)
     defaultConfig {
         minSdk 26
         targetSdk 35
@@ -57,7 +62,7 @@ android {
 
     packaging {
         jniLibs { useLegacyPackaging true }
-        // pickFirsts += ['lib/**/libc++_shared.so'] // opcional
+        // pickFirsts += ['lib/**/libc++_shared.so'] // solo si hay conflicto
     }
 }
 
@@ -68,46 +73,49 @@ def getSdkDir() {
 }
 
 def GetIl2CppOutputPath(String workingDir, String abi) {
-    return "${workingDir}/src/main/jniLibs/${abi}/libil2cpp.so";
+    return "${workingDir}/src/main/jniLibs/${abi}/libil2cpp.so"
 }
 
 def GetIl2CppSymbolPath(String workingDir, String abi) {
-    return "${workingDir}/symbols/${abi}/libil2cpp.so";
+    return "${workingDir}/symbols/${abi}/libil2cpp.so"
 }
 
-// ---- IMPORTANTE: usar el NDK de Unity (UNITY_NDK) ----
+// Compila il2cpp usando el ejecutable del Editor y el NDK de Unity
 def BuildIl2CppImpl(String workingDir, String configuration, String architecture, String abi, String[] staticLibraries) {
-    def commandLineArgs = []
-    commandLineArgs.add("--compile-cpp")
-    commandLineArgs.add("--platform=Android")
-    commandLineArgs.add("--architecture=${architecture}")
-    commandLineArgs.add("--outputpath=${workingDir}/src/main/jniLibs/${abi}/libil2cpp.so")
-    commandLineArgs.add("--baselib-directory=${workingDir}/src/main/jniStaticLibs/${abi}")
-    commandLineArgs.add("--configuration=${configuration}")
-    commandLineArgs.add("--dotnetprofile=unityaot-linux")
-    commandLineArgs.add("--usymtool-path=${workingDir}/src/main/Il2CppOutputProject/usymtool.exe")
-    commandLineArgs.add("--profiler-report")
-    commandLineArgs.add("--profiler-output-file=${workingDir}/build/il2cpp_${abi}_${configuration}/il2cpp_conv.traceevents")
-    commandLineArgs.add("--print-command-line")
-    commandLineArgs.add("--static-lib-il2-cpp")
-    commandLineArgs.add("--data-folder=${workingDir}/src/main/Il2CppOutputProject/Source/il2cppOutput/data")
-    commandLineArgs.add("--generatedcppdir=${workingDir}/src/main/Il2CppOutputProject/Source/il2cppOutput")
-    commandLineArgs.add("--cachedirectory=${workingDir}/build/il2cpp_${abi}_${configuration}/il2cpp_cache")
-    // << Aquí el cambio clave: no usamos android.ndkDirectory >>
-    commandLineArgs.add("--tool-chain-path=" + project.ext.UNITY_NDK_PATH)
+    def il2cppExe = project.ext.UNITY_IL2CPP_PATH
+    if (!file(il2cppExe).exists()) {
+        throw new GradleException("IL2CPP no encontrado en: ${il2cppExe}")
+    }
+    def ndkPath = project.ext.UNITY_NDK_PATH
+    if (!file(ndkPath).exists()) {
+        throw new GradleException("NDK no encontrado en: ${ndkPath}")
+    }
+
+    def cliArgs = []
+    cliArgs.add("--compile-cpp")
+    cliArgs.add("--platform=Android")
+    cliArgs.add("--architecture=${architecture}")
+    cliArgs.add("--outputpath=${workingDir}/src/main/jniLibs/${abi}/libil2cpp.so")
+    cliArgs.add("--baselib-directory=${workingDir}/src/main/jniStaticLibs/${abi}")
+    cliArgs.add("--configuration=${configuration}")
+    cliArgs.add("--dotnetprofile=unityaot-linux")
+    cliArgs.add("--usymtool-path=${workingDir}/src/main/Il2CppOutputProject/usymtool.exe")
+    cliArgs.add("--profiler-report")
+    cliArgs.add("--profiler-output-file=${workingDir}/build/il2cpp_${abi}_${configuration}/il2cpp_conv.traceevents")
+    cliArgs.add("--print-command-line")
+    cliArgs.add("--static-lib-il2-cpp")
+    cliArgs.add("--data-folder=${workingDir}/src/main/Il2CppOutputProject/Source/il2cppOutput/data")
+    cliArgs.add("--generatedcppdir=${workingDir}/src/main/Il2CppOutputProject/Source/il2cppOutput")
+    cliArgs.add("--cachedirectory=${workingDir}/build/il2cpp_${abi}_${configuration}/il2cpp_cache")
+    cliArgs.add("--tool-chain-path=${ndkPath}")
 
     staticLibraries.eachWithIndex { fileName, i ->
-        commandLineArgs.add("--additional-libraries=${workingDir}/src/main/jniStaticLibs/${abi}/${fileName}")
+        cliArgs.add("--additional-libraries=${workingDir}/src/main/jniStaticLibs/${abi}/${fileName}")
     }
 
-    def executableExtension = ""
-    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
-        executableExtension = ".exe"
-        commandLineArgs = commandLineArgs*.replace('\"', '\\\"')
-    }
     exec {
-        executable "${workingDir}/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp${executableExtension}"
-        args commandLineArgs
+        // Usamos commandLine para evitar el choque con el nombre 'args'
+        commandLine([il2cppExe] + cliArgs)
         environment "ANDROID_SDK_ROOT", getSdkDir()
     }
 
@@ -117,7 +125,8 @@ def BuildIl2CppImpl(String workingDir, String configuration, String architecture
     def extensionToKeep = usePublicSymbols ? ".sym.so" : ".dbg.so"
 
     delete "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToRemove}"
-    ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}", tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
+    ant.move(file: "${workingDir}/src/main/jniLibs/${abi}/libil2cpp${extensionToKeep}",
+            tofile: "${workingDir}/symbols/${abi}/libil2cpp.so")
 }
 
 android {
@@ -125,12 +134,15 @@ android {
         def workingDir = projectDir.toString().replaceAll('\\\\', '/')
         def archs = ['arm64':'arm64-v8a']
         def staticLibs = ['arm64':[]]
+
         inputs.files fileTree(dir: 'src/main/Il2CppOutputProject', include: ['**/*'])
         inputs.files fileTree(dir: 'src/main/jniStaticLibs', include: ['**/*'])
+
         archs.each { arch, abi ->
             outputs.file GetIl2CppOutputPath(workingDir, abi)
             outputs.file GetIl2CppSymbolPath(workingDir, abi)
         }
+
         doLast {
             archs.each { arch, abi ->
                 BuildIl2CppImpl(workingDir, 'Release', arch, abi, staticLibs[arch] as String[])
