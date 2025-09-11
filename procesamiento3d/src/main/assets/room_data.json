@@ -1,0 +1,99 @@
+{
+  "room_dimensions": {
+    "height": 2.8,
+    "unit": "meters"
+  },
+  "corners": [
+    {
+      "id": "A",
+      "position": [0.0, 0.0]
+    },
+    {
+      "id": "B",
+      "position": [4.5, 0.0]
+    },
+    {
+      "id": "C",
+      "position": [4.5, 3.2]
+    },
+    {
+      "id": "D",
+      "position": [0.0, 3.2]
+    },
+    {
+      "id": "P1",
+      "position": [4.5, 1.0]
+    },
+    {
+      "id": "P2",
+      "position": [4.8, 1.0]
+    },
+    {
+      "id": "P3",
+      "position": [4.8, 2.0]
+    },
+    {
+      "id": "P4",
+      "position": [4.5, 2.0]
+    }
+  ],
+  "walls": [
+    {
+      "from": "A",
+      "to": "B",
+      "distance": 4.5,
+      "direction": "east",
+      "id": "wall_AB"
+    },
+    {
+      "from": "B",
+      "to": "P1",
+      "distance": 1.0,
+      "direction": "north",
+      "id": "wall_BP1"
+    },
+    {
+      "from": "P1",
+      "to": "P2",
+      "distance": 0.3,
+      "direction": "east",
+      "id": "wall_P1P2"
+    },
+    {
+      "from": "P2",
+      "to": "P3",
+      "distance": 1.0,
+      "direction": "north",
+      "id": "wall_P2P3"
+    },
+    {
+      "from": "P3",
+      "to": "P4",
+      "distance": 0.3,
+      "direction": "west",
+      "id": "wall_P3P4"
+    },
+    {
+      "from": "P4",
+      "to": "C",
+      "distance": 1.2,
+      "direction": "north",
+      "id": "wall_P4C"
+    },
+    {
+      "from": "C",
+      "to": "D",
+      "distance": 4.5,
+      "direction": "west",
+      "id": "wall_CD"
+    },
+    {
+      "from": "D",
+      "to": "A",
+      "distance": 3.2,
+      "direction": "south",
+      "id": "wall_DA"
+    }
+  ],
+  "origin_reference": "A"
+}

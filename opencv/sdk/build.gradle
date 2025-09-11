@@ -1,0 +1,53 @@
+plugins {
+    id("com.android.library")
+    id("kotlin-android")
+}
+
+android {
+    namespace = "org.opencv"
+    compileSdk = 33
+
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 33
+
+        externalNativeBuild {
+            cmake {
+                arguments += listOf("-DANDROID_STL=c++_shared")
+                targets += listOf("opencv_jni_shared")
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+    }
+
+    sourceSets["main"].apply {
+        jniLibs.srcDirs("native/libs")
+        java.srcDirs("java/src")
+        res.srcDirs("java/res")
+        manifest.srcFile("java/AndroidManifest.xml")
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("libcxx_helper/CMakeLists.txt")
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+dependencies {
+    // No libraries internas adicionales requeridas
+}

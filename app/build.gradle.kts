@@ -38,18 +38,33 @@ android {
     buildFeatures {
         compose = true
     }
+
+     bundle {
+        storeArchive {
+            enable = false
+        }
+    }
 }
 
 dependencies {
+        implementation(libs.androidx.recyclerview)
     // CameraX
     val camerax_version = "1.3.0"
+        implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("androidx.camera:camera-core:$camerax_version")
     implementation("androidx.camera:camera-camera2:$camerax_version")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.camera:camera-lifecycle:$camerax_version")
     implementation("androidx.camera:camera-view:$camerax_version")
     implementation("androidx.camera:camera-extensions:$camerax_version")
     implementation("androidx.compose.material:material-icons-extended")
-
+    implementation("androidx.compose.ui:ui:1.5.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(project(":procesamiento3d"))
+    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -66,6 +81,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+        // ARCore
+    implementation("com.google.ar:core:1.42.0")
+
+    // OpenCV (Java bindings para Android)
+    implementation(project(":sdk"))
 
     implementation(project(":unityLibrary"))
 }

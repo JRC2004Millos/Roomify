@@ -23,6 +23,13 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Roomify"
+
+val opencvsdk = file("sdk")
+
 include(":app")
+include(":procesamiento3d")
 include(":unityLibrary")
+include(":sdk")
 include(":unityLibrary:xrmanifest.androidlib")
+
+project(":sdk").projectDir = opencvsdk
