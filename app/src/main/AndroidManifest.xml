@@ -45,7 +45,8 @@
             android:name=".PreviewTextureActivity" />
         <activity
             android:name=".CargaActivity" />
-
+        <activity
+            android:name=".CaptureActivity" />
     </application>
 
 </manifest>

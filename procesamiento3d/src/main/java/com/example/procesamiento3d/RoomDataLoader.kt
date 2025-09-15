@@ -38,8 +38,8 @@ object RoomDataLoader {
         return parseWalls(json)
     }
 
-    /** Parser tolerante para walls; añade Piso y Techo al final */
-    private fun parseWalls(jsonString: String): List<WallInfo> {
+    /** Parser tolerante para walls; añade Piso y Techo al final (pública, no duplicar) */
+    fun parseWalls(jsonString: String): List<WallInfo> {
         val json = JSONObject(jsonString)
         val wallsArr: JSONArray = json.optJSONArray("walls") ?: JSONArray()
         val result = mutableListOf<WallInfo>()
@@ -61,14 +61,38 @@ object RoomDataLoader {
         result.add(WallInfo("Techo", "all", "all", "ceiling"))
         return result
     }
+
+    /** Fallback a assets si aún no existe el runtime */
+    fun loadWallsFromAssets(context: Context): List<WallInfo> {
+        return try {
+            val json = context.assets.open("walls.json").use { it.readBytes().toString(Charsets.UTF_8) }
+            parseWalls(json)
+        } catch (_: Throwable) {
+            emptyList()
+        }
+    }
+
+    /** Preferir runtime (Unity) y caer a assets si aún no existe */
+    fun loadWalls(context: Context): List<WallInfo> {
+        return if (isRuntimeJsonReady(context)) loadWallsRuntime(context)
+        else loadWallsFromAssets(context)
+    }
+
+    /** Útil para debug rápido */
+    fun debugWhere(context: Context): String {
+        val f = runtimeJsonFile(context)
+        return "runtime: ${f.absolutePath} (exists=${f.exists()}, size=${if (f.exists()) f.length() else 0})"
+    }
 }
 
 /** Observa SOLO la carpeta runtime y dispara callback cuando aparece/actualiza room_data.json */
 class RoomJsonObserver(
     context: Context,
     private val onJsonReadyOrUpdated: () -> Unit
-) : FileObserver(getWatchDir(context).absolutePath, CREATE or CLOSE_WRITE or MOVED_TO) {
-
+) : FileObserver(
+    getWatchDir(context).absolutePath,
+    FileObserver.CREATE or FileObserver.CLOSE_WRITE or FileObserver.MOVED_TO
+) {
     companion object {
         private fun getWatchDir(context: Context): File {
             return context.getExternalFilesDir(null) ?: context.filesDir
@@ -78,8 +102,8 @@ class RoomJsonObserver(
 
     override fun onEvent(event: Int, path: String?) {
         if (path?.endsWith(TARGET) == true) {
-            // Evita leer mientras se está escribiendo: reacciona en CLOSE_WRITE o en MOVED_TO (rename atómico)
-            if (event == CLOSE_WRITE || event == MOVED_TO || event == CREATE) {
+            // Reacciona cuando termina de escribirse o se mueve (rename atómico)
+            if (event == FileObserver.CLOSE_WRITE || event == FileObserver.MOVED_TO || event == FileObserver.CREATE) {
                 onJsonReadyOrUpdated()
             }
         }

@@ -37,6 +37,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.compose.foundation.lazy.items
 import android.util.Log
 
 class CaptureActivity : ComponentActivity() {
@@ -61,40 +62,62 @@ class CaptureActivity : ComponentActivity() {
     @Composable
     fun WallListScreen(onWallSelected: (String) -> Unit) {
         val context = LocalContext.current
-        val walls = remember { RoomDataLoader.loadWallsFromAssets(context) }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            items(walls.size) { index ->
-                val wall = walls[index]
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable {
-                            val albedoFile =
-                                File(context.cacheDir, "${wall.label.replace(" ", "_")}_Albedo.png")
-                            if (albedoFile.exists()) {
-                                val intent =
-                                    Intent(context, PreviewTextureActivity::class.java).apply {
-                                        putExtra("texturePath", File(context.cacheDir, "${wall.label.replace(" ", "_")}_Albedo.png").absolutePath)
+        // 1) Carga inicial: runtime si existe, si no, assets
+        var walls by remember { mutableStateOf(RoomDataLoader.loadWalls(context)) }
+
+        // 2) Observa el archivo runtime y refresca cuando Unity lo escriba/actualice
+        DisposableEffect(Unit) {
+            val observer = com.example.procesamiento3d.RoomJsonObserver(context) {
+                walls = runCatching { RoomDataLoader.loadWallsRuntime(context) }.getOrElse { emptyList() }
+            }
+            observer.startWatching()
+            onDispose { observer.stopWatching() }
+        }
+
+        // 3) Lista
+        if (walls.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No hay paredes aún. Ejecuta la medición en Unity para generar room_data.json.")
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(walls) { wall: com.example.procesamiento3d.WallInfo ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                val safe = wall.label.replace(" ", "_")
+                                val albedoFile = File(context.cacheDir, "${safe}_Albedo.png")
+                                if (albedoFile.exists()) {
+                                    val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                                        putExtra("texturePath", albedoFile.absolutePath)
+                                        putExtra("processedPath", File(context.cacheDir, "${safe}_Processed.jpg").absolutePath)
                                         putExtra("wallName", wall.label)
-                                        putExtra("processedPath", File(context.cacheDir, "${wall.label.replace(" ", "_")}_Processed.jpg").absolutePath)
                                     }
-                                context.startActivity(intent)
-                            } else {
-                                onWallSelected(wall.label)
+                                    context.startActivity(intent)
+                                } else {
+                                    onWallSelected(wall.label)
+                                }
                             }
-                        }
-                ) {
-                    Text(
-                        text = wall.label,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    ) {
+                        Text(
+                            text = wall.label,
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
         }
@@ -132,6 +155,7 @@ class CaptureActivity : ComponentActivity() {
             val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
             LaunchedEffect(true) {
+                kotlinx.coroutines.delay(750) // espera 0.7s para que Unity libere la cámara
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
