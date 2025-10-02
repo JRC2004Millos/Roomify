@@ -2,7 +2,7 @@ pluginManagement {
     repositories {
         google {
             content {
-                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.android.*")  // Corregido: agregado asterisco
                 includeGroupByRegex("com\\.google.*")
                 includeGroupByRegex("androidx.*")
             }
@@ -11,25 +11,32 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+        // Agregado flatDir aquí en lugar de duplicar dependencyResolutionManagement
         flatDir {
-            dirs("$rootDir/unityLibrary/libs")
+            dirs("unityLibrary/libs")  // Simplificado la ruta
         }
     }
 }
 
 rootProject.name = "Roomify"
 
-val opencvsdk = file("sdk")
-
+// Módulos principales
 include(":app")
-include(":procesamiento3d")
-include(":unityLibrary")
 include(":sdk")
-include(":unityLibrary:xrmanifest.androidlib")
+include(":procesamiento3d")  // Agregar módulo faltante
+include(":unityLibrary")
+project(":unityLibrary").projectDir = file("unityLibrary")
 
+// Submódulo de Unity XR
+include(":unityLibrary:xrmanifest.androidlib")
+project(":unityLibrary:xrmanifest.androidlib").projectDir = file("unityLibrary/xrmanifest.androidlib")
+
+// Configuración de SDK
+val opencvsdk = file("sdk")
 project(":sdk").projectDir = opencvsdk

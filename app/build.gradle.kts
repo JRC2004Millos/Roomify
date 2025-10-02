@@ -44,6 +44,24 @@ android {
             enable = false
         }
     }
+    packaging {
+        // Resolver conflictos de librerías nativas duplicadas
+        jniLibs {
+            pickFirsts += "**/libc++_shared.so"
+            // También puedes agregar otros archivos problemáticos:
+            // pickFirsts += "**/libfoo.so"
+        }
+
+        // Alternativa más específica si solo quieres libc++_shared.so:
+        // jniLibs {
+        //     pickFirsts += "lib/*/libc++_shared.so"
+        // }
+
+        // Si hay conflictos con recursos también:
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 dependencies {
@@ -55,7 +73,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("androidx.camera:camera-core:$camerax_version")
     implementation("androidx.camera:camera-camera2:$camerax_version")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("androidx.camera:camera-lifecycle:$camerax_version")
     implementation("androidx.camera:camera-view:$camerax_version")
     implementation("androidx.camera:camera-extensions:$camerax_version")

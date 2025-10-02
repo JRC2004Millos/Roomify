@@ -577,6 +577,7 @@ IL2CPP_EXTERN_C String_t* _stringLiteral0FC055EB677272ECB03EAE6A35BD064C00E89CBB
 IL2CPP_EXTERN_C String_t* _stringLiteral10AAD5EEC5D690381A4112D7757515104C4246ED;
 IL2CPP_EXTERN_C String_t* _stringLiteral15B662E9CE71B7834AA044DF561810E1321192F4;
 IL2CPP_EXTERN_C String_t* _stringLiteral16E59EDD2FD454E9711E0B96F4D5EA57CE3A8EF4;
+IL2CPP_EXTERN_C String_t* _stringLiteral17FE0583769BE2B1554F18B70ACCCA93901149BD;
 IL2CPP_EXTERN_C String_t* _stringLiteral180344FE3F82961E58ED4F8AE4E1F4B4BB6F95CE;
 IL2CPP_EXTERN_C String_t* _stringLiteral19185977762F1D370D03E76921A267F6A5FA9F81;
 IL2CPP_EXTERN_C String_t* _stringLiteral19915492B480BD57789CDA80DAECF8CD2BD7A104;
@@ -598,7 +599,6 @@ IL2CPP_EXTERN_C String_t* _stringLiteral288C4AFD858F5C479F505A418E21B7802883034F
 IL2CPP_EXTERN_C String_t* _stringLiteral293CC2FC3E5359A39784BA1BA2B87ADF6F978BD8;
 IL2CPP_EXTERN_C String_t* _stringLiteral2A597F3CC73B236F7D188CE2FD0313010A42447D;
 IL2CPP_EXTERN_C String_t* _stringLiteral2E049514BFBC258460005BEECCA3378305D185BE;
-IL2CPP_EXTERN_C String_t* _stringLiteral2E680ED5653AEADE32B101F00631067FA1C18D4D;
 IL2CPP_EXTERN_C String_t* _stringLiteral32D998EC1E1EEBF95E629E3A1B6AEE6436A29F49;
 IL2CPP_EXTERN_C String_t* _stringLiteral33FB7AF7ABDF17603AB5BF71F55F85D37A8310C7;
 IL2CPP_EXTERN_C String_t* _stringLiteral350AC627D0D74DAC9A2AD52177E70CACF4294264;
@@ -614,7 +614,6 @@ IL2CPP_EXTERN_C String_t* _stringLiteral41B51FFCE780DC0EB3F0FF787A65D2E222FDA9AD
 IL2CPP_EXTERN_C String_t* _stringLiteral43AA204F89F1B9F28929952674918676562754BA;
 IL2CPP_EXTERN_C String_t* _stringLiteral442C93593DCE45765B4642894C14D3F5BDE87878;
 IL2CPP_EXTERN_C String_t* _stringLiteral45EE4883CDE67FE6B013C71176B61EE1D2154200;
-IL2CPP_EXTERN_C String_t* _stringLiteral46C2061DD56CAFB959C3648AF0B066CF64C0CD07;
 IL2CPP_EXTERN_C String_t* _stringLiteral49AE794C00022ECA141068DEA9531BF6E0D342B7;
 IL2CPP_EXTERN_C String_t* _stringLiteral4BD051D0F22F519D9BCB62346EAE022BF51F021C;
 IL2CPP_EXTERN_C String_t* _stringLiteral4D04E6915D0E509E62C6F1900379329F1290AF3F;
@@ -767,6 +766,7 @@ IL2CPP_EXTERN_C String_t* _stringLiteralF844899EF9AC43C83B0272C53BFA9C43110441F0
 IL2CPP_EXTERN_C String_t* _stringLiteralF8B3C6035C05097B8D37222B0E2227A4F44FF43E;
 IL2CPP_EXTERN_C String_t* _stringLiteralF8DFFB9A74ECC396A7A3257960415547B1F58ED7;
 IL2CPP_EXTERN_C String_t* _stringLiteralF9D225733E1D10F9344C755C4A9C0870CD1DE97B;
+IL2CPP_EXTERN_C String_t* _stringLiteralFACF475F1EBC3163F352FF032C00C521C4049B3C;
 IL2CPP_EXTERN_C String_t* _stringLiteralFC2A368EC6B09D7670707343672D60E45A4F60A1;
 IL2CPP_EXTERN_C String_t* _stringLiteralFC8F367F0D48FF8785CA71D208A714E76904F407;
 IL2CPP_EXTERN_C String_t* _stringLiteralFCD650E553294E488B903C18B21012CF13FB166B;
@@ -7651,8 +7651,8 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ClearTargetsPass_Render_m6D8C18E9E3343A6
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&TextureHandle_t680ABA3F8B50859351BA5DD66220084F87F37388_il2cpp_TypeInfo_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec_U3CRenderU3Eb__3_0_mD1346451077E418F56AE737F3D7C07C3900D2E79_RuntimeMethod_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec_tE2F577A639C5FA3846BFF109059BD156C94F21DC_il2cpp_TypeInfo_var);
-		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral46C2061DD56CAFB959C3648AF0B066CF64C0CD07);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral940D9D43F86586CDEE551569CFD7A7CF394900BD);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralFACF475F1EBC3163F352FF032C00C521C4049B3C);
 		s_Il2CppMethodInitialized = true;
 	}
 	RuntimeObject* V_0 = NULL;
@@ -7667,7 +7667,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ClearTargetsPass_Render_m6D8C18E9E3343A6
 		ProfilingSampler_t420D4672EDB44E0EF980B31ADFD9E5747200FECE* L_1 = ((ClearTargetsPass_tE871E7860C82F1575110F27E9D5505D71C1E8D0E_StaticFields*)il2cpp_codegen_static_fields_for(ClearTargetsPass_tE871E7860C82F1575110F27E9D5505D71C1E8D0E_il2cpp_TypeInfo_var))->___s_ClearProfilingSampler;
 		NullCheck(L_0);
 		RuntimeObject* L_2;
-		L_2 = RenderGraph_AddRasterRenderPass_TisPassData_t2CAE615CA17D4873C41658D4E5CAC4468B50BBDD_mB3525DA882639925D05EE49E55971936CAA15ED6(L_0, _stringLiteral940D9D43F86586CDEE551569CFD7A7CF394900BD, (&V_1), L_1, _stringLiteral46C2061DD56CAFB959C3648AF0B066CF64C0CD07, ((int32_t)1956), RenderGraph_AddRasterRenderPass_TisPassData_t2CAE615CA17D4873C41658D4E5CAC4468B50BBDD_mB3525DA882639925D05EE49E55971936CAA15ED6_RuntimeMethod_var);
+		L_2 = RenderGraph_AddRasterRenderPass_TisPassData_t2CAE615CA17D4873C41658D4E5CAC4468B50BBDD_mB3525DA882639925D05EE49E55971936CAA15ED6(L_0, _stringLiteral940D9D43F86586CDEE551569CFD7A7CF394900BD, (&V_1), L_1, _stringLiteralFACF475F1EBC3163F352FF032C00C521C4049B3C, ((int32_t)1956), RenderGraph_AddRasterRenderPass_TisPassData_t2CAE615CA17D4873C41658D4E5CAC4468B50BBDD_mB3525DA882639925D05EE49E55971936CAA15ED6_RuntimeMethod_var);
 		V_0 = L_2;
 	}
 	{
@@ -10512,7 +10512,7 @@ IL_00ba_1:
 				Type_t* L_50 = V_17;
 				NullCheck(L_50);
 				String_t* L_51;
-				L_51 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_50);
+				L_51 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_50);
 				NullCheck(L_49);
 				(L_49)->SetAt(static_cast<il2cpp_array_size_t>(3), (String_t*)L_51);
 				StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_52 = L_49;
@@ -10532,7 +10532,7 @@ IL_00ba_1:
 				Type_t* L_58 = V_11;
 				NullCheck(L_58);
 				String_t* L_59;
-				L_59 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_58);
+				L_59 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_58);
 				NullCheck(L_57);
 				(L_57)->SetAt(static_cast<il2cpp_array_size_t>(7), (String_t*)L_59);
 				StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_60 = L_57;
@@ -10578,7 +10578,7 @@ IL_0154_1:
 				L_72 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_71, NULL);
 				NullCheck(L_72);
 				String_t* L_73;
-				L_73 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_72);
+				L_73 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_72);
 				NullCheck(L_70);
 				(L_70)->SetAt(static_cast<il2cpp_array_size_t>(3), (String_t*)L_73);
 				StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_74 = L_70;
@@ -25156,7 +25156,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DeferredLights_SetupRenderGraphLights_mD
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&RenderGraph_AddUnsafePass_TisSetupLightPassData_tA40A910C9436A6305128815883D46A828A97F59E_mDF92BE9BC88886925A82FCC24BB304ACC752E259_RuntimeMethod_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec_U3CSetupRenderGraphLightsU3Eb__140_0_mDE57ED098540BC9B392DC4DF2CCFBEC3ECCB2E77_RuntimeMethod_var);
 		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec_t13CC57AF784608DDD81AB4CFD075A699F4E9D248_il2cpp_TypeInfo_var);
-		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral2E680ED5653AEADE32B101F00631067FA1C18D4D);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral17FE0583769BE2B1554F18B70ACCCA93901149BD);
 		s_Il2CppMethodInitialized = true;
 	}
 	RuntimeObject* V_0 = NULL;
@@ -25175,7 +25175,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DeferredLights_SetupRenderGraphLights_mD
 		ProfilingSampler_t420D4672EDB44E0EF980B31ADFD9E5747200FECE* L_3 = ((DeferredLights_t8A3C2AC9C4AF92CF3411F722D8A094EA07DA14AC_StaticFields*)il2cpp_codegen_static_fields_for(DeferredLights_t8A3C2AC9C4AF92CF3411F722D8A094EA07DA14AC_il2cpp_TypeInfo_var))->___s_SetupDeferredLights;
 		NullCheck(L_0);
 		RuntimeObject* L_4;
-		L_4 = RenderGraph_AddUnsafePass_TisSetupLightPassData_tA40A910C9436A6305128815883D46A828A97F59E_mDF92BE9BC88886925A82FCC24BB304ACC752E259(L_0, L_2, (&V_1), L_3, _stringLiteral2E680ED5653AEADE32B101F00631067FA1C18D4D, ((int32_t)313), RenderGraph_AddUnsafePass_TisSetupLightPassData_tA40A910C9436A6305128815883D46A828A97F59E_mDF92BE9BC88886925A82FCC24BB304ACC752E259_RuntimeMethod_var);
+		L_4 = RenderGraph_AddUnsafePass_TisSetupLightPassData_tA40A910C9436A6305128815883D46A828A97F59E_mDF92BE9BC88886925A82FCC24BB304ACC752E259(L_0, L_2, (&V_1), L_3, _stringLiteral17FE0583769BE2B1554F18B70ACCCA93901149BD, ((int32_t)313), RenderGraph_AddUnsafePass_TisSetupLightPassData_tA40A910C9436A6305128815883D46A828A97F59E_mDF92BE9BC88886925A82FCC24BB304ACC752E259_RuntimeMethod_var);
 		V_0 = L_4;
 	}
 	{
@@ -28035,7 +28035,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DeferredLights_RenderClusterLights_m66F0
 		L_6 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_6);
 		String_t* L_7;
-		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_6);
+		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_6);
 		NullCheck(L_5);
 		ArrayElementTypeCheck (L_5, L_7);
 		(L_5)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_7);
@@ -28175,7 +28175,7 @@ IL_000e:
 		L_8 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(__this, NULL);
 		NullCheck(L_8);
 		String_t* L_9;
-		L_9 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_8);
+		L_9 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_8);
 		NullCheck(L_7);
 		ArrayElementTypeCheck (L_7, L_9);
 		(L_7)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_9);
@@ -33205,7 +33205,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* ContextContainer_C
 		L_4 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_3, NULL);
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(25, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(26, L_4);
 		String_t* L_6;
 		L_6 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral49AE794C00022ECA141068DEA9531BF6E0D342B7)), L_5, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral19185977762F1D370D03E76921A267F6A5FA9F81)), NULL);
 		InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB* L_7 = (InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB_il2cpp_TypeInfo_var)));
@@ -33251,7 +33251,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* ContextContainer_G
 		L_4 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_3, NULL);
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(25, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(26, L_4);
 		String_t* L_6;
 		L_6 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral49AE794C00022ECA141068DEA9531BF6E0D342B7)), L_5, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral01A849374C26F36DBF4641EFCBB31ABDCEFF10D2)), NULL);
 		InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB* L_7 = (InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&InvalidOperationException_t5DDE4D49B7405FAAB1E4576F4715A42A3FAD4BAB_il2cpp_TypeInfo_var)));

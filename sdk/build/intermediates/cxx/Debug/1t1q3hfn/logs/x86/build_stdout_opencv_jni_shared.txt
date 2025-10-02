@@ -1,3 +1,3 @@
-ninja: Entering directory `C:\Users\rodri\AndroidStudioProjects\Roomify\sdk\.cxx\Debug\1t1q3hfn\x86'
+ninja: Entering directory `/Users/nicoh/Documents/IntegracionFinal/Roomify/sdk/.cxx/Debug/1t1q3hfn/x86'
 [1/2] Building CXX object CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o
 [2/2] Linking CXX static library libopencv_jni_shared.a
