@@ -18,6 +18,11 @@ local.properties
 [Ll]ibrary/
 [Tt]emp/
 [Bb]uild/
+# Permitir toolchain IL2CPP exportado por Unity
+!unityLibrary/src/main/Il2CppOutputProject/IL2CPP/**
+!unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/**
+!unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/**
+
 [Oo]bj/
 *.csproj
 *.unityproj
