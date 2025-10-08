@@ -1,5 +1,7 @@
 package com.example.roomify
 
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -14,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class PreviewTextureActivity : ComponentActivity() {
@@ -22,34 +26,35 @@ class PreviewTextureActivity : ComponentActivity() {
 
         val texturePath = intent.getStringExtra("texturePath")
         val processedPath = intent.getStringExtra("processedPath")
-        val wallName = intent.getStringExtra("wallName")
+        val wallName = intent.getStringExtra("wallName") ?: "Pared"
 
         setContent {
             MaterialTheme {
-                val textureBitmap by remember(texturePath) {
-                    mutableStateOf(texturePath?.let {
-                        val file = File(it)
+                // Carga en background (IO) para no bloquear la UI
+                val textureBitmap by produceState<Bitmap?>(initialValue = null, texturePath) {
+                    value = texturePath?.let { path ->
+                        val file = File(path)
                         if (file.exists()) {
                             Log.d("PreviewTexture", "📂 Textura encontrada en cache")
-                            loadScaledBitmap(it)
+                            withContext(Dispatchers.IO) { loadScaledBitmap(path) }
                         } else {
-                            Log.e("PreviewTexture", "❌ No se encontró textura en $it")
+                            Log.e("PreviewTexture", "❌ No se encontró textura en $path")
                             null
                         }
-                    })
+                    }
                 }
 
-                val processedBitmap by remember(processedPath) {
-                    mutableStateOf(processedPath?.let {
-                        val file = File(it)
+                val processedBitmap by produceState<Bitmap?>(initialValue = null, processedPath) {
+                    value = processedPath?.let { path ->
+                        val file = File(path)
                         if (file.exists()) {
                             Log.d("PreviewTexture", "🧩 Imagen procesada encontrada")
-                            loadScaledBitmap(it)
+                            withContext(Dispatchers.IO) { loadScaledBitmap(path) }
                         } else {
-                            Log.e("PreviewTexture", "❌ No se encontró imagen procesada en $it")
+                            Log.e("PreviewTexture", "❌ No se encontró imagen procesada en $path")
                             null
                         }
-                    })
+                    }
                 }
 
                 Column(
@@ -89,17 +94,46 @@ class PreviewTextureActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.height(16.dp))
                     } ?: Text("⚠️ No se encontró la textura sugerida.")
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Button(
                         onClick = {
-                            setResult(RESULT_OK)
+                            // Si viene una pared destino (applyToWall), copia los archivos con el nombre de esa pared
+                            val applyToWall = intent.getStringExtra("applyToWall")
+                            val texturePath = intent.getStringExtra("texturePath")
+                            val processedPath = intent.getStringExtra("processedPath")
+
+                            if (!applyToWall.isNullOrBlank() && !texturePath.isNullOrBlank()) {
+                                val base = applyToWall.replace(" ", "_")
+                                val dstAlbedo = File(cacheDir, "${base}_Albedo.png")
+                                File(texturePath).copyTo(dstAlbedo, overwrite = true)
+
+                                processedPath?.let { pp ->
+                                    val dstProcessed = File(cacheDir, "${base}_Processed.jpg")
+                                    File(pp).copyTo(dstProcessed, overwrite = true)
+                                }
+                            }
+
+                            setResult(Activity.RESULT_OK)
                             finish()
                         },
                         modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Tomar nueva textura")
-                    }
+                    ) { Text("✅ Confirmar textura") }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // 🔄 Repetir toma
+                    OutlinedButton(
+                        onClick = {
+                            val result = Intent().apply {
+                                putExtra("repeat", true)
+                                putExtra("wallName", wallName) // para reabrir cámara en esa pared
+                            }
+                            setResult(Activity.RESULT_FIRST_USER, result)
+                            finish()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("🔄 Repetir toma de textura") }
                 }
             }
         }
@@ -107,12 +141,11 @@ class PreviewTextureActivity : ComponentActivity() {
 }
 
 fun loadScaledBitmap(path: String, maxDimension: Int = 1080): Bitmap? {
-    val options = BitmapFactory.Options().apply {
-        inJustDecodeBounds = true
-    }
+    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
     BitmapFactory.decodeFile(path, options)
 
-    val (height, width) = options.outHeight to options.outWidth
+    val height = options.outHeight
+    val width = options.outWidth
     if (height <= 0 || width <= 0) {
         Log.e("loadScaledBitmap", "❌ Error al obtener dimensiones de $path")
         return null
@@ -123,10 +156,7 @@ fun loadScaledBitmap(path: String, maxDimension: Int = 1080): Bitmap? {
         scale *= 2
     }
 
-    val decodeOptions = BitmapFactory.Options().apply {
-        inSampleSize = scale
-    }
-
+    val decodeOptions = BitmapFactory.Options().apply { inSampleSize = scale }
     return BitmapFactory.decodeFile(path, decodeOptions)?.also {
         Log.d("loadScaledBitmap", "✅ Imagen decodificada correctamente")
     } ?: run {

@@ -1,6 +1,7 @@
 package com.example.roomify
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
@@ -18,6 +19,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,18 +28,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import com.example.procesamiento3d.RoomDataLoader
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.procesamiento3d.TextureProcessor
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import androidx.compose.foundation.lazy.items
+import androidx.lifecycle.lifecycleScope
 import android.util.Log
 
 class CaptureActivity : ComponentActivity() {
@@ -50,26 +50,107 @@ class CaptureActivity : ComponentActivity() {
 
         setContent {
             var selectedWall by remember { mutableStateOf<String?>(null) }
+            val context = LocalContext.current
+            var pendingTargetWall by remember { mutableStateOf<String?>(null) }
 
+            // === 1) PREVIEW launcher ===
+            val previewLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                when (result.resultCode) {
+                    Activity.RESULT_OK -> {
+                        // Confirmó textura → volver a la lista
+                        selectedWall = null
+                    }
+                    Activity.RESULT_FIRST_USER -> {
+                        // Repetir toma
+                        if (result.data?.getBooleanExtra("repeat", false) == true) {
+                            val wall = result.data?.getStringExtra("wallName")
+                            if (!wall.isNullOrBlank()) selectedWall = wall
+                        }
+                    }
+                }
+            }
+
+            // === 2) PREVIEW lambda ===
+            val openPreview: (String?, String?, String) -> Unit = { texturePath, processedPath, wallName ->
+                val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                    putExtra("texturePath", texturePath)
+                    putExtra("processedPath", processedPath)
+                    putExtra("wallName", wallName)
+                }
+                previewLauncher.launch(intent)
+            }
+
+            val chooserLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                when (result.resultCode) {
+                    Activity.RESULT_OK -> {
+                        val albedo = result.data?.getStringExtra("albedoPath")
+                        val processed = result.data?.getStringExtra("processedPath")
+                        val sourceWall = result.data?.getStringExtra("sourceWall") ?: "Textura"
+
+                        val applyTo = pendingTargetWall ?: sourceWall  // 👈 pared destino real
+
+                        if (albedo != null) {
+                            // Lanza el preview PERO indicando pared destino
+                            val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                                putExtra("texturePath", albedo)
+                                putExtra("processedPath", processed)
+                                putExtra("wallName", sourceWall)     // lo que estás viendo
+                                putExtra("applyToWall", applyTo)      // 👈 a quién se le asigna
+                            }
+                            previewLauncher.launch(intent)
+                        }
+                    }
+                    Activity.RESULT_FIRST_USER -> {
+                        val wall = result.data?.getStringExtra("targetWall")
+                        if (!wall.isNullOrBlank()) selectedWall = wall
+                    }
+                }
+            }
+
+            val openChooser: (String) -> Unit = { targetWall ->
+                pendingTargetWall = targetWall   // 👈 recuerda a qué pared se quiere aplicar
+                val intent = Intent(context, TextureChooserActivity::class.java).apply {
+                    putExtra("targetWall", targetWall)
+                }
+                chooserLauncher.launch(intent)
+            }
+
+            // === 5) UI principal ===
             if (selectedWall == null) {
-                WallListScreen { wallName -> selectedWall = wallName }
+                WallListScreen(
+                    onWallSelected = { wallName -> selectedWall = wallName },
+                    openPreview = openPreview,
+                    openChooser = openChooser
+                )
             } else {
-                CameraTextureCapture(wallName = selectedWall!!)
+                CameraTextureCapture(
+                    wallName = selectedWall!!,
+                    openPreview = openPreview
+                )
             }
         }
     }
 
     @Composable
-    fun WallListScreen(onWallSelected: (String) -> Unit) {
+    fun WallListScreen(
+        onWallSelected: (String) -> Unit,
+        openPreview: (String?, String?, String) -> Unit,
+        openChooser: (String) -> Unit
+    ) {
         val context = LocalContext.current
 
-        // 1) Carga inicial: runtime si existe, si no, assets
-        var walls by remember { mutableStateOf(RoomDataLoader.loadWalls(context)) }
+        // 1) Carga inicial desde tu JSON
+        var walls by remember { mutableStateOf(com.example.procesamiento3d.RoomDataLoader.loadWalls(context)) }
 
-        // 2) Observa el archivo runtime y refresca cuando Unity lo escriba/actualice
+        // 2) Observa cambios del JSON en runtime (usa tu observer si lo tienes)
         DisposableEffect(Unit) {
             val observer = com.example.procesamiento3d.RoomJsonObserver(context) {
-                walls = runCatching { RoomDataLoader.loadWallsRuntime(context) }.getOrElse { emptyList() }
+                walls = runCatching { com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(context) }
+                    .getOrElse { emptyList() }
             }
             observer.startWatching()
             onDispose { observer.stopWatching() }
@@ -99,24 +180,49 @@ class CaptureActivity : ComponentActivity() {
                             .padding(vertical = 8.dp)
                             .clickable {
                                 val safe = wall.label.replace(" ", "_")
-                                val albedoFile = File(context.cacheDir, "${safe}_Albedo.png")
-                                if (albedoFile.exists()) {
-                                    val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                                        putExtra("texturePath", albedoFile.absolutePath)
-                                        putExtra("processedPath", File(context.cacheDir, "${safe}_Processed.jpg").absolutePath)
-                                        putExtra("wallName", wall.label)
-                                    }
-                                    context.startActivity(intent)
+                                val thisAlbedo = File(context.cacheDir, "${safe}_Albedo.png")
+
+                                if (thisAlbedo.exists()) {
+                                    // Ya tiene textura → abrir preview directo
+                                    openPreview(
+                                        thisAlbedo.absolutePath,
+                                        File(context.cacheDir, "${safe}_Processed.jpg").absolutePath,
+                                        wall.label
+                                    )
                                 } else {
-                                    onWallSelected(wall.label)
+                                    // ¿Hay otras texturas capturadas en caché?
+                                    val hasAnyTexture = (context.cacheDir.listFiles { f ->
+                                        f.isFile && f.name.endsWith("_Albedo.png")
+                                    } ?: emptyArray()).isNotEmpty()
+
+                                    if (hasAnyTexture) {
+                                        // Reutilizar: abrir selector
+                                        openChooser(wall.label)
+                                    } else {
+                                        // No hay ninguna textura → ir a cámara para esta pared
+                                        onWallSelected(wall.label)
+                                    }
                                 }
                             }
                     ) {
-                        Text(
-                            text = wall.label,
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        Column(Modifier.padding(16.dp)) {
+                            Text(
+                                text = wall.label,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(Modifier.height(6.dp))
+
+                            // Hint visual de estado
+                            val safe = wall.label.replace(" ", "_")
+                            val hasThis = File(context.cacheDir, "${safe}_Albedo.png").exists()
+                            val estado = if (hasThis) "Textura capturada" else "Sin textura"
+                            Text(
+                                text = estado,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (hasThis) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
@@ -124,7 +230,10 @@ class CaptureActivity : ComponentActivity() {
     }
 
     @Composable
-    fun CameraTextureCapture(wallName: String) {
+    fun CameraTextureCapture(
+        wallName: String,
+        openPreview: (String?, String?, String) -> Unit
+    ) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
         val previewView = remember { PreviewView(context) }
@@ -132,8 +241,7 @@ class CaptureActivity : ComponentActivity() {
         var hasPermission by remember {
             mutableStateOf(
                 ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CAMERA
+                    context, Manifest.permission.CAMERA
                 ) == PackageManager.PERMISSION_GRANTED
             )
         }
@@ -155,33 +263,28 @@ class CaptureActivity : ComponentActivity() {
             val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
             LaunchedEffect(true) {
-                kotlinx.coroutines.delay(750) // espera 0.7s para que Unity libere la cámara
+                kotlinx.coroutines.delay(750) // espera ~0.7s para que Unity libere la cámara
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
                 }
-
                 imageCapture = ImageCapture.Builder().build()
-
                 val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageCapture
+                    lifecycleOwner, cameraSelector, preview, imageCapture
                 )
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
                 AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
+                // Marco guía
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val rectWidth = size.width * 0.6f
                     val rectHeight = size.height * 0.4f
                     val left = (size.width - rectWidth) / 2f
                     val top = (size.height - rectHeight) / 2f
-
                     drawRect(
                         color = Color.White,
                         topLeft = Offset(left, top),
@@ -190,6 +293,7 @@ class CaptureActivity : ComponentActivity() {
                     )
                 }
 
+                // Botón capturar
                 Button(
                     onClick = {
                         val fileNameBase = wallName.replace(" ", "_")
@@ -205,37 +309,35 @@ class CaptureActivity : ComponentActivity() {
                                 }
 
                                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    CoroutineScope(Dispatchers.IO).launch {
+                                    // Lanzamos en Main para tocar estado, y calculamos en IO
+                                    val scope = lifecycleOwner.lifecycleScope
+                                    scope.launch(Dispatchers.Main) {
                                         isProcessing = true
+                                        val textureName = withContext(Dispatchers.IO) {
+                                            val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                                            val (_, tName) = TextureProcessor.procesarYCompararTextura(
+                                                context = context,
+                                                previewView = previewView,
+                                                originalBitmap = originalBitmap,
+                                                wallName = wallName
+                                            )
+                                            Log.d("CaptureActivity", "🎯 Resultado de textura sugerida: $tName")
+                                            tName
+                                        }
+                                        isProcessing = false
 
-                                        val originalBitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+                                        if (textureName != null) {
+                                            val base = wallName.replace(" ", "_")
+                                            val textureFile = File(context.cacheDir, "${base}_Albedo.png")
+                                            val processedFile = File(context.cacheDir, "${base}_Processed.jpg")
 
-                                        // 🔄 Procesar, recortar, comparar y guardar resultados
-                                        val (_, textureName) = TextureProcessor.procesarYCompararTextura(
-                                            context = context,
-                                            previewView = previewView,
-                                            originalBitmap = originalBitmap,
-                                            wallName = wallName
-                                        )
-                                        Log.d("CaptureActivity", "🎯 Resultado de textura sugerida: $textureName")
-
-                                        withContext(Dispatchers.Main) {
-                                            isProcessing = false
-
-                                            if (textureName != null) {
-                                                val textureFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Albedo.png")
-                                                val processedFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Processed.jpg")
-
-                                                val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                                                    putExtra("texturePath", textureFile.absolutePath)
-                                                    putExtra("processedPath", processedFile.absolutePath)
-                                                    putExtra("wallName", wallName)
-                                                }
-                                                context.startActivity(intent)
-                                                if (context is ComponentActivity) context.finish()
-                                            } else {
-                                                Toast.makeText(context, "❌ No se recibió textura", Toast.LENGTH_LONG).show()
-                                            }
+                                            openPreview(
+                                                textureFile.absolutePath,
+                                                processedFile.absolutePath,
+                                                wallName
+                                            )
+                                        } else {
+                                            Toast.makeText(context, "❌ No se pudo determinar textura.", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }

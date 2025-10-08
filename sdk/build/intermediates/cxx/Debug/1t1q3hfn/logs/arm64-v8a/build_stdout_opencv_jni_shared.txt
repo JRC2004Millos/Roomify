@@ -1,2 +1,2 @@
-ninja: Entering directory `/Users/nicoh/Documents/IntegracionFinal/Roomify/sdk/.cxx/Debug/1t1q3hfn/arm64-v8a'
+ninja: Entering directory `C:\Users\Usuario\Documents\Universidad Javeriana\Semestre 8\prototipo_roomify\Roomify\sdk\.cxx\Debug\1t1q3hfn\arm64-v8a'
 ninja: no work to do.

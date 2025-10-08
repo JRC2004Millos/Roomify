@@ -10,9 +10,9 @@ object RetrofitClient {
     private const val BASE_URL = "http://192.168.1.13:8000/"
 
     private val client = OkHttpClient.Builder()
-        .connectTimeout(20, TimeUnit.SECONDS)  // tiempo para conectar
-        .readTimeout(30, TimeUnit.SECONDS)     // tiempo para leer respuesta
-        .readTimeout(60, TimeUnit.SECONDS)    // tiempo para esperar respuesta
+        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(300, TimeUnit.SECONDS)
+        .writeTimeout(300, TimeUnit.SECONDS)
         .build()
 
     val api: TextureApiService by lazy {
