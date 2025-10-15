@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -19,41 +20,54 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.example.roomify.storage.TextureAssignmentStore
 
 class PreviewTextureActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val texturePath = intent.getStringExtra("texturePath")
-        val processedPath = intent.getStringExtra("processedPath")
+        // --- Datos del intent y resolución de rutas a mostrar ---
         val wallName = intent.getStringExtra("wallName") ?: "Pared"
+        val applyToWall = intent.getStringExtra("applyToWall")
+        val target = applyToWall ?: wallName
+        val base = target.replace(" ", "_")
+
+        val canonicalAlbedo = File(cacheDir, "${base}_Albedo.png")
+        val canonicalProcessed = File(cacheDir, "${base}_Processed.jpg")
+
+        val intentAlbedo = intent.getStringExtra("texturePath")
+        val intentProcessed = intent.getStringExtra("processedPath")
+
+        // ✅ Lo que realmente se mostrará en pantalla
+        val texturePathToShow: String? = when {
+            !intentAlbedo.isNullOrBlank() && File(intentAlbedo).exists() -> intentAlbedo
+            canonicalAlbedo.exists() -> canonicalAlbedo.absolutePath
+            else -> null
+        }
+        val processedPathToShow: String? = when {
+            !intentProcessed.isNullOrBlank() && File(intentProcessed).exists() -> intentProcessed
+            canonicalProcessed.exists() -> canonicalProcessed.absolutePath
+            else -> null
+        }
+
+        Log.d("Preview/resolve", "target=$target")
+        Log.d("Preview/resolve", "show Albedo=${texturePathToShow ?: "null"}")
+        Log.d("Preview/resolve", "show Processed=${processedPathToShow ?: "null"}")
 
         setContent {
             MaterialTheme {
                 // Carga en background (IO) para no bloquear la UI
-                val textureBitmap by produceState<Bitmap?>(initialValue = null, texturePath) {
-                    value = texturePath?.let { path ->
+                val textureBitmap by produceState<Bitmap?>(initialValue = null, texturePathToShow) {
+                    value = texturePathToShow?.let { path ->
                         val file = File(path)
-                        if (file.exists()) {
-                            Log.d("PreviewTexture", "📂 Textura encontrada en cache")
-                            withContext(Dispatchers.IO) { loadScaledBitmap(path) }
-                        } else {
-                            Log.e("PreviewTexture", "❌ No se encontró textura en $path")
-                            null
-                        }
+                        if (file.exists()) withContext(Dispatchers.IO) { loadScaledBitmap(path) } else null
                     }
                 }
 
-                val processedBitmap by produceState<Bitmap?>(initialValue = null, processedPath) {
-                    value = processedPath?.let { path ->
+                val processedBitmap by produceState<Bitmap?>(initialValue = null, processedPathToShow) {
+                    value = processedPathToShow?.let { path ->
                         val file = File(path)
-                        if (file.exists()) {
-                            Log.d("PreviewTexture", "🧩 Imagen procesada encontrada")
-                            withContext(Dispatchers.IO) { loadScaledBitmap(path) }
-                        } else {
-                            Log.e("PreviewTexture", "❌ No se encontró imagen procesada en $path")
-                            null
-                        }
+                        if (file.exists()) withContext(Dispatchers.IO) { loadScaledBitmap(path) } else null
                     }
                 }
 
@@ -98,21 +112,80 @@ class PreviewTextureActivity : ComponentActivity() {
 
                     Button(
                         onClick = {
-                            // Si viene una pared destino (applyToWall), copia los archivos con el nombre de esa pared
-                            val applyToWall = intent.getStringExtra("applyToWall")
-                            val texturePath = intent.getStringExtra("texturePath")
-                            val processedPath = intent.getStringExtra("processedPath")
+                            val applyTo = intent.getStringExtra("applyToWall") ?: (intent.getStringExtra("wallName") ?: "Pared")
+                            val destBase = applyTo.replace(" ", "_")
+                            val dstAlbedo = File(cacheDir, "${destBase}_Albedo.png")
+                            val dstProcessed = File(cacheDir, "${destBase}_Processed.jpg")
 
-                            if (!applyToWall.isNullOrBlank() && !texturePath.isNullOrBlank()) {
-                                val base = applyToWall.replace(" ", "_")
-                                val dstAlbedo = File(cacheDir, "${base}_Albedo.png")
-                                File(texturePath).copyTo(dstAlbedo, overwrite = true)
+                            // ⚠️ Usa exactamente lo que se muestra
+                            val srcAlbedoPath = texturePathToShow ?: intent.getStringExtra("texturePath")
+                            val srcAlbedo = srcAlbedoPath?.let { File(it) }
 
-                                processedPath?.let { pp ->
-                                    val dstProcessed = File(cacheDir, "${base}_Processed.jpg")
-                                    File(pp).copyTo(dstProcessed, overwrite = true)
+                            if (srcAlbedo == null || !srcAlbedo.exists()) {
+                                Toast.makeText(this@PreviewTextureActivity, "No hay textura para confirmar.", Toast.LENGTH_SHORT).show()
+                                return@Button
+                            }
+
+                            if (!srcAlbedo.absolutePath.equals(dstAlbedo.absolutePath, ignoreCase = true)) {
+                                runCatching { srcAlbedo.copyTo(dstAlbedo, overwrite = true) }
+                                    .onFailure { e ->
+                                        Log.e("PreviewConfirm", "copy albedo fail: ${e.message}")
+                                        Toast.makeText(this@PreviewTextureActivity, "Error copiando textura: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        return@Button
+                                    }
+                            }
+
+                            processedPathToShow?.let { pp ->
+                                if (!dstProcessed.absolutePath.equals(pp, true) && File(pp).exists()) {
+                                    runCatching { File(pp).copyTo(dstProcessed, overwrite = true) }
+                                        .onFailure { e -> Log.e("PreviewConfirm", "copy processed fail: ${e.message}") }
                                 }
                             }
+
+                            // ===== Persistencia del JSON (pack + path) ANTES de cerrar =====
+                            TextureAssignmentStore.loadJson(this@PreviewTextureActivity)
+
+                            // pack: intent -> store -> nombre de carpeta del albedo mostrado
+                            val packFromIntent = intent.getStringExtra("packName")
+                            val packFromStore  = TextureAssignmentStore.getPack(applyTo)
+                            val fallbackPack = srcAlbedo.nameWithoutExtension.ifBlank { "Local" }
+                            val packToPersist  = packFromStore ?: packFromIntent ?: fallbackPack
+
+                            // path: intent -> /files/pbrpacks/<pack> -> carpeta del albedo destino
+                            val pathFromIntent = intent.getStringExtra("packPath")
+                            val pbrDir = File(filesDir, "pbrpacks/$packToPersist")
+                            val storePath = TextureAssignmentStore.getPathForWall(applyTo)
+                            val pathToPersist = when {
+                                !pathFromIntent.isNullOrBlank() -> pathFromIntent
+                                pbrDir.isDirectory -> pbrDir.absolutePath
+                                !storePath.isNullOrBlank() -> storePath
+                                else -> dstAlbedo.parent
+                            }
+
+                            // Equivalentes por nombre base
+                            fun canonical(label: String) = label.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
+                            val allWalls = runCatching {
+                                com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(this@PreviewTextureActivity)
+                            }.getOrElse {
+                                com.example.procesamiento3d.RoomDataLoader.loadWalls(this@PreviewTextureActivity)
+                            }
+                            val eqWalls = allWalls.map { it.label }
+                                .filter { canonical(it) == canonical(applyTo) }
+                                .ifEmpty { listOf(applyTo) }
+
+                            eqWalls.forEach { w ->
+                                TextureAssignmentStore.put(
+                                    wall = w,
+                                    pack = packToPersist,
+                                    path = pathToPersist
+                                )
+                            }
+
+                            // Log explícito de a dónde se guarda el JSON
+                            val outFile = File(getExternalFilesDir(null)!!, "textures_model.json")
+                            Log.d("TextureStore", "(Preview) guardando en: ${outFile.absolutePath}")
+
+                            TextureAssignmentStore.saveJson(this@PreviewTextureActivity)
 
                             setResult(Activity.RESULT_OK)
                             finish()
@@ -127,7 +200,7 @@ class PreviewTextureActivity : ComponentActivity() {
                         onClick = {
                             val result = Intent().apply {
                                 putExtra("repeat", true)
-                                putExtra("wallName", wallName) // para reabrir cámara en esa pared
+                                putExtra("wallName", wallName)
                             }
                             setResult(Activity.RESULT_FIRST_USER, result)
                             finish()
@@ -138,6 +211,9 @@ class PreviewTextureActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun canonical(label: String) =
+        label.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
 }
 
 fun loadScaledBitmap(path: String, maxDimension: Int = 1080): Bitmap? {

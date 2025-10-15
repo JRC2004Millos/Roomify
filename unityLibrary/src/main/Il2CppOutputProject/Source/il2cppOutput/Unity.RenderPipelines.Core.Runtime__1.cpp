@@ -26572,7 +26572,7 @@ IL_000f:
 		L_5 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_4, NULL);
 		NullCheck(L_3);
 		bool L_6;
-		L_6 = VirtualFuncInvoker1< bool, Type_t* >::Invoke(21, L_3, L_5);
+		L_6 = VirtualFuncInvoker1< bool, Type_t* >::Invoke(20, L_3, L_5);
 		if (L_6)
 		{
 			goto IL_002c;
@@ -26704,7 +26704,7 @@ IL_001d:
 		Type_t* L_9 = V_3;
 		NullCheck(L_9);
 		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_10;
-		L_10 = VirtualFuncInvoker1< ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*, bool >::Invoke(13, L_9, (bool)0);
+		L_10 = VirtualFuncInvoker1< ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*, bool >::Invoke(12, L_9, (bool)0);
 		V_6 = L_10;
 		V_7 = 0;
 		goto IL_0075;
@@ -26794,7 +26794,7 @@ IL_0075:
 		Type_t* L_27 = V_3;
 		NullCheck(L_27);
 		String_t* L_28;
-		L_28 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_27);
+		L_28 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_27);
 		V_4 = L_28;
 	}
 
@@ -26944,7 +26944,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR VolumeComponent_t8121D1F6054A9DFB3A596EE451FD
 		Type_t* L_2 = ___0_volumeComponentType;
 		NullCheck(L_1);
 		bool L_3;
-		L_3 = VirtualFuncInvoker1< bool, Type_t* >::Invoke(22, L_1, L_2);
+		L_3 = VirtualFuncInvoker1< bool, Type_t* >::Invoke(21, L_1, L_2);
 		if (L_3)
 		{
 			goto IL_0014;

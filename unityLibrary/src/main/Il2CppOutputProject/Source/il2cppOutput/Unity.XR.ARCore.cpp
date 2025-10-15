@@ -12879,7 +12879,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR NativeArray_1_t81F55263465517B73C455D3400CF67
 		String_t* L_1 = ___0_s;
 		NullCheck(L_0);
 		int32_t L_2;
-		L_2 = VirtualFuncInvoker1< int32_t, String_t* >::Invoke(11, L_0, L_1);
+		L_2 = VirtualFuncInvoker1< int32_t, String_t* >::Invoke(10, L_0, L_1);
 		V_0 = L_2;
 		int32_t L_3 = V_0;
 		NativeArray_1__ctor_m981CC7E27B6C9946024877F2696920951443B04F((&V_1), ((int32_t)il2cpp_codegen_add(L_3, 1)), 4, 1, NativeArray_1__ctor_m981CC7E27B6C9946024877F2696920951443B04F_RuntimeMethod_var);
@@ -12918,7 +12918,7 @@ IL_0028:
 		int32_t L_15 = V_0;
 		NullCheck(L_9);
 		int32_t L_16;
-		L_16 = VirtualFuncInvoker4< int32_t, Il2CppChar*, int32_t, uint8_t*, int32_t >::Invoke(20, L_9, L_10, L_12, (uint8_t*)L_14, L_15);
+		L_16 = VirtualFuncInvoker4< int32_t, Il2CppChar*, int32_t, uint8_t*, int32_t >::Invoke(19, L_9, L_10, L_12, (uint8_t*)L_14, L_15);
 		goto IL_004e;
 	}
 	catch(Il2CppExceptionWrapper& e)
@@ -13894,7 +13894,7 @@ IL_0024:
 		L_6 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_5, NULL);
 		NullCheck(L_6);
 		String_t* L_7;
-		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_6);
+		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_6);
 		String_t* L_8;
 		L_8 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral8F75ECDB116DCBBF6FC5A38C92B230BE664085FE)), L_7, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral1CA5F011288BCBF98331BBD2D5505E1A91FD9790)), NULL);
 		ArgumentException_tAD90411542A20A9C72D5CDA3A84181D8B947A263* L_9 = (ArgumentException_tAD90411542A20A9C72D5CDA3A84181D8B947A263*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&ArgumentException_tAD90411542A20A9C72D5CDA3A84181D8B947A263_il2cpp_TypeInfo_var)));
@@ -24567,7 +24567,7 @@ IL_000e:
 		String_t* L_3 = ___0_string;
 		NullCheck(L_2);
 		int32_t L_4;
-		L_4 = VirtualFuncInvoker1< int32_t, String_t* >::Invoke(11, L_2, L_3);
+		L_4 = VirtualFuncInvoker1< int32_t, String_t* >::Invoke(10, L_2, L_3);
 		V_0 = L_4;
 		int32_t L_5 = V_0;
 		int32_t L_6 = ___2_allocator;
@@ -24603,7 +24603,7 @@ IL_0032:
 		int32_t L_18 = V_0;
 		NullCheck(L_12);
 		int32_t L_19;
-		L_19 = VirtualFuncInvoker4< int32_t, Il2CppChar*, int32_t, uint8_t*, int32_t >::Invoke(20, L_12, L_13, L_15, (uint8_t*)L_17, L_18);
+		L_19 = VirtualFuncInvoker4< int32_t, Il2CppChar*, int32_t, uint8_t*, int32_t >::Invoke(19, L_12, L_13, L_15, (uint8_t*)L_17, L_18);
 		V_3 = (String_t*)NULL;
 		NativeArray_1_t81F55263465517B73C455D3400CF67B4BADD85CF L_20 = V_1;
 		return L_20;

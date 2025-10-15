@@ -4400,7 +4400,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool AccessibilityHierarchy_TryGetNode_m98DF2
 		AccessibilityNode_t9998B596BE3A0232C1CFE3B2610DF52E0338A49A** L_2 = ___1_node;
 		NullCheck(L_0);
 		bool L_3;
-		L_3 = InterfaceFuncInvoker2< bool, int32_t, AccessibilityNode_t9998B596BE3A0232C1CFE3B2610DF52E0338A49A** >::Invoke(7, IDictionary_2_t32BE5EB8FB339477299955B6732035BC7442094A_il2cpp_TypeInfo_var, L_0, L_1, L_2);
+		L_3 = InterfaceFuncInvoker2< bool, int32_t, AccessibilityNode_t9998B596BE3A0232C1CFE3B2610DF52E0338A49A** >::Invoke(6, IDictionary_2_t32BE5EB8FB339477299955B6732035BC7442094A_il2cpp_TypeInfo_var, L_0, L_1, L_2);
 		V_0 = L_3;
 		goto IL_0011;
 	}
@@ -5896,7 +5896,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ServiceManager_UpdateServices_mD104C87C1
 		L_4 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_3, NULL);
 		NullCheck(L_2);
 		bool L_5;
-		L_5 = InterfaceFuncInvoker1< bool, Type_t* >::Invoke(4, IDictionary_2_t5C66CA874FF1BDA090CD606305BA7497929CA042_il2cpp_TypeInfo_var, L_2, L_4);
+		L_5 = InterfaceFuncInvoker1< bool, Type_t* >::Invoke(3, IDictionary_2_t5C66CA874FF1BDA090CD606305BA7497929CA042_il2cpp_TypeInfo_var, L_2, L_4);
 		V_1 = (bool)((((int32_t)L_5) == ((int32_t)0))? 1 : 0);
 		bool L_6 = V_1;
 		if (!L_6)
@@ -5918,7 +5918,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ServiceManager_UpdateServices_mD104C87C1
 		L_11 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_10, NULL);
 		AccessibilityHierarchyService_tBD2815280FE4AB3C14158F8BF261B48CB66B9FB3* L_12 = V_2;
 		NullCheck(L_9);
-		InterfaceActionInvoker2< Type_t*, RuntimeObject* >::Invoke(5, IDictionary_2_t5C66CA874FF1BDA090CD606305BA7497929CA042_il2cpp_TypeInfo_var, L_9, L_11, L_12);
+		InterfaceActionInvoker2< Type_t*, RuntimeObject* >::Invoke(4, IDictionary_2_t5C66CA874FF1BDA090CD606305BA7497929CA042_il2cpp_TypeInfo_var, L_9, L_11, L_12);
 	}
 
 IL_0049:

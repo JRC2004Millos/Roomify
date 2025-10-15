@@ -1,26 +1,33 @@
 apply plugin: 'com.android.library'
-apply plugin: 'org.jetbrains.kotlin.android'
-//apply from: '../shared/keepUnitySymbols.gradle'
-
-// Definir unityStreamingAssets si no existe
-def unityStreamingAssets = project.hasProperty('unityStreamingAssets') ? project.unityStreamingAssets : ""
+apply from: '../shared/keepUnitySymbols.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation(name: 'arcore_client', ext:'aar')
-    implementation(name: 'UnityARCore', ext:'aar')
     implementation(name: 'ARPresto', ext:'aar')
+    implementation(name: 'UnityARCore', ext:'aar')
     implementation(name: 'unityandroidpermissions', ext:'aar')
     implementation project(':unityLibrary:xrmanifest.androidlib')
-    implementation 'androidx.games:games-frame-pacing:2.1.2'
+}
+
+// Lee -PunityStreamingAssets si te lo pasan por línea de comandos; si no, vacío
+def unityStreamingAssetsRaw = (project.findProperty('unityStreamingAssets') ?: "") as String
+
+// Construye la lista final para noCompress
+def noCompressList = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp']
+if (unityStreamingAssetsRaw.trim()) {
+    // Admite "a,b,c" o "a, b, c"
+    noCompressList.addAll(
+            unityStreamingAssetsRaw.split(/\s*,\s*/).findAll { it?.trim() }
+    )
 }
 
 android {
     namespace "com.unity3d.player"
-    ndkPath "C:\\Users\\Usuario\\Desktop\\RoomifyPruebas\\unityLibrary"
+    ndkPath "C:/Program Files/Unity/Hub/Editor/6000.1.7f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
     ndkVersion "27.2.12479018"
     compileSdk 36
-    buildToolsVersion = "36.0.0"
+    buildToolsVersion = "34.0.0"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -38,12 +45,6 @@ android {
             abiFilters "arm64-v8a"
             debugSymbolLevel "none"
         }
-
-        externalNativeBuild {
-            cmake {
-                arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-            }
-        }
     }
 
     lint {
@@ -52,8 +53,7 @@ android {
 
     androidResources {
         ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
-        // Solución para el error de unityStreamingAssets
-        noCompress = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'] + (unityStreamingAssets.isEmpty() ? [] : unityStreamingAssets.tokenize(', '))
+        noCompress = noCompressList
     }
 
     packaging {
@@ -62,7 +62,6 @@ android {
         }
     }
 }
-
 
 def getSdkDir() {
     Properties local = new Properties()
@@ -87,7 +86,7 @@ def BuildIl2CppImpl(String workingDir, String configuration, String architecture
     commandLineArgs.add("--baselib-directory=${workingDir}/src/main/jniStaticLibs/${abi}")
     commandLineArgs.add("--configuration=${configuration}")
     commandLineArgs.add("--dotnetprofile=unityaot-linux")
-    commandLineArgs.add("--usymtool-path=${workingDir}/src/main/Il2CppOutputProject/usymtool")
+    commandLineArgs.add("--usymtool-path=${workingDir}/src/main/Il2CppOutputProject/usymtool.exe")
     commandLineArgs.add("--profiler-report")
     commandLineArgs.add("--profiler-output-file=${workingDir}/build/il2cpp_${abi}_${configuration}/il2cpp_conv.traceevents")
     commandLineArgs.add("--print-command-line")
@@ -155,14 +154,4 @@ android {
             jni.srcDirs = ["src/main/Il2CppOutputProject"]
         }
     }
-}
-
-android.externalNativeBuild {
-    cmake {
-        version "3.22.1"
-        path "src/main/cpp/CMakeLists.txt"
-    }
-}
-android.buildFeatures {
-    prefab true
 }

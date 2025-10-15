@@ -28280,29 +28280,29 @@ IL_0040:
 		int32_t L_12;
 		L_12 = FourCC_op_Implicit_mC296B4E8C4929EACBB7066BB9856C116EE082A7B_inline(L_11, NULL);
 		NullCheck(L_10);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_10, L_12);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_10, L_12);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_13 = V_0;
 		int32_t L_14 = ((InputEventTrace_t1D25547AACA8FD1C1AA974F31EF9BD9478205FBD_StaticFields*)il2cpp_codegen_static_fields_for(InputEventTrace_t1D25547AACA8FD1C1AA974F31EF9BD9478205FBD_il2cpp_TypeInfo_var))->___kFileVersion;
 		NullCheck(L_13);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_13, L_14);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_13, L_14);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_15 = V_0;
 		int32_t L_16 = V_1;
 		NullCheck(L_15);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_15, L_16);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_15, L_16);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_17 = V_0;
 		il2cpp_codegen_runtime_class_init_inline(Application_tDB03BE91CDF0ACA614A5E0B67CFB77C44EB19B21_il2cpp_TypeInfo_var);
 		int32_t L_18;
 		L_18 = Application_get_platform_m59EF7D6155D18891B24767F83F388160B1FF2138(NULL);
 		NullCheck(L_17);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_17, L_18);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_17, L_18);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_19 = V_0;
 		int64_t L_20 = __this->___m_EventCount;
 		NullCheck(L_19);
-		VirtualActionInvoker1< uint64_t >::Invoke(22, L_19, L_20);
+		VirtualActionInvoker1< uint64_t >::Invoke(19, L_19, L_20);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_21 = V_0;
 		int64_t L_22 = __this->___m_EventSizeInBytes;
 		NullCheck(L_21);
-		VirtualActionInvoker1< uint64_t >::Invoke(22, L_21, L_22);
+		VirtualActionInvoker1< uint64_t >::Invoke(19, L_21, L_22);
 		RuntimeObject* L_23;
 		L_23 = InputEventTrace_GetEnumerator_mEB8437D4B14D194CBA901FB9DD034AB0BD1015E3(__this, NULL);
 		V_5 = L_23;
@@ -28405,7 +28405,7 @@ IL_00c8_2:
 						BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_38 = V_0;
 						ByteU5BU5D_tA6237BF417AE52AD70CFB4EF24A7A82613DF9031* L_39 = V_8;
 						NullCheck(L_38);
-						VirtualActionInvoker1< ByteU5BU5D_tA6237BF417AE52AD70CFB4EF24A7A82613DF9031* >::Invoke(12, L_38, L_39);
+						VirtualActionInvoker1< ByteU5BU5D_tA6237BF417AE52AD70CFB4EF24A7A82613DF9031* >::Invoke(9, L_38, L_39);
 						goto IL_00e7_1;
 					}
 				}
@@ -28440,11 +28440,11 @@ IL_00fe:
 	{
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_42 = V_0;
 		NullCheck(L_42);
-		VirtualActionInvoker0::Invoke(8, L_42);
+		VirtualActionInvoker0::Invoke(6, L_42);
 		Stream_tF844051B786E8F7F4244DBD218D74E8617B9A2DE* L_43 = ___0_stream;
 		NullCheck(L_43);
 		int64_t L_44;
-		L_44 = VirtualFuncInvoker0< int64_t >::Invoke(12, L_43);
+		L_44 = VirtualFuncInvoker0< int64_t >::Invoke(11, L_43);
 		V_2 = L_44;
 		DeviceInfoU5BU5D_t83A513EC4EB7BD3AA21A9352117520BC63C34E1A* L_45 = __this->___m_DeviceInfos;
 		int32_t L_46;
@@ -28453,7 +28453,7 @@ IL_00fe:
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_47 = V_0;
 		int32_t L_48 = V_3;
 		NullCheck(L_47);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_47, L_48);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_47, L_48);
 		V_11 = 0;
 		goto IL_0187;
 	}
@@ -28469,13 +28469,13 @@ IL_0123:
 		int32_t L_53;
 		L_53 = DeviceInfo_get_deviceId_m1F56DCC1850CA1B775C357DA6D521F04EA74F0C6_inline(L_52, NULL);
 		NullCheck(L_51);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_51, L_53);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_51, L_53);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_54 = V_0;
 		DeviceInfo_tAB83FF3BB4996BA68DFDF5D6255C1FEBB452AE52* L_55 = V_12;
 		String_t* L_56;
 		L_56 = DeviceInfo_get_layout_mC531D6400FCF8EE7CCBE96D0DC9328BC0A5AC24C_inline(L_55, NULL);
 		NullCheck(L_54);
-		VirtualActionInvoker1< String_t* >::Invoke(24, L_54, L_56);
+		VirtualActionInvoker1< String_t* >::Invoke(21, L_54, L_56);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_57 = V_0;
 		DeviceInfo_tAB83FF3BB4996BA68DFDF5D6255C1FEBB452AE52* L_58 = V_12;
 		FourCC_tA6CAA4015BC25A7F1053B6C512202D57A9C994ED L_59;
@@ -28483,13 +28483,13 @@ IL_0123:
 		int32_t L_60;
 		L_60 = FourCC_op_Implicit_mC296B4E8C4929EACBB7066BB9856C116EE082A7B_inline(L_59, NULL);
 		NullCheck(L_57);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_57, L_60);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_57, L_60);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_61 = V_0;
 		DeviceInfo_tAB83FF3BB4996BA68DFDF5D6255C1FEBB452AE52* L_62 = V_12;
 		int32_t L_63;
 		L_63 = DeviceInfo_get_stateSizeInBytes_mD21A7DBF02B25079F7A1F1482AC2EFE5A86F5C9C_inline(L_62, NULL);
 		NullCheck(L_61);
-		VirtualActionInvoker1< int32_t >::Invoke(19, L_61, L_63);
+		VirtualActionInvoker1< int32_t >::Invoke(16, L_61, L_63);
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_64 = V_0;
 		DeviceInfo_tAB83FF3BB4996BA68DFDF5D6255C1FEBB452AE52* L_65 = V_12;
 		String_t* L_66 = L_65->___m_FullLayoutJson;
@@ -28512,7 +28512,7 @@ IL_0123:
 IL_017c:
 	{
 		NullCheck(G_B23_1);
-		VirtualActionInvoker1< String_t* >::Invoke(24, G_B23_1, G_B23_0);
+		VirtualActionInvoker1< String_t* >::Invoke(21, G_B23_1, G_B23_0);
 		int32_t L_69 = V_11;
 		V_11 = ((int32_t)il2cpp_codegen_add(L_69, 1));
 	}
@@ -28529,17 +28529,17 @@ IL_0187:
 	{
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_72 = V_0;
 		NullCheck(L_72);
-		VirtualActionInvoker0::Invoke(8, L_72);
+		VirtualActionInvoker0::Invoke(6, L_72);
 		Stream_tF844051B786E8F7F4244DBD218D74E8617B9A2DE* L_73 = ___0_stream;
 		NullCheck(L_73);
 		int64_t L_74;
-		L_74 = VirtualFuncInvoker0< int64_t >::Invoke(12, L_73);
+		L_74 = VirtualFuncInvoker0< int64_t >::Invoke(11, L_73);
 		int64_t L_75 = V_2;
 		V_4 = ((int64_t)il2cpp_codegen_subtract(L_74, L_75));
 		BinaryWriter_tFB94D67EDFA3F6A34744A163BDABE287FDF2ED1E* L_76 = V_0;
 		int64_t L_77 = V_4;
 		NullCheck(L_76);
-		VirtualActionInvoker1< int64_t >::Invoke(21, L_76, L_77);
+		VirtualActionInvoker1< int64_t >::Invoke(18, L_76, L_77);
 		return;
 	}
 }

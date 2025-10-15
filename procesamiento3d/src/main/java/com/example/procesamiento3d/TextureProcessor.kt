@@ -23,7 +23,6 @@ import java.util.zip.ZipFile
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipEntry
 import java.io.FileOutputStream
-import com.example.procesamiento3d.storage.TextureAssignmentStore
 
 object TextureProcessor {
     private val zipClient: OkHttpClient by lazy {
@@ -81,14 +80,6 @@ object TextureProcessor {
             Log.e("TextureProcessor", "❌ pack_url vacío en la respuesta")
         }
 
-        if (resp?.pack != null) {
-            TextureAssignmentStore.put(
-                wall = wallName,          // nombre de la pared/piso/techo
-                pack = resp.pack,         // p.ej. "Wood085A_8K-PNG"
-                zip  = resp.pack_url      // URL del .zip (útil para Unity luego)
-            )
-            TextureAssignmentStore.saveJson(context)  // escribe Android/data/<pkg>/files/example.json
-        }
         return Pair(processedBitmap, resp?.pack)
     }
 

@@ -39,6 +39,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import androidx.lifecycle.lifecycleScope
 import android.util.Log
+import com.example.roomify.storage.TextureAssignmentStore
 
 class CaptureActivity : ComponentActivity() {
 
@@ -52,6 +53,7 @@ class CaptureActivity : ComponentActivity() {
             var selectedWall by remember { mutableStateOf<String?>(null) }
             val context = LocalContext.current
             var pendingTargetWall by remember { mutableStateOf<String?>(null) }
+            var refreshKey by remember { mutableStateOf(0) }
 
             // === 1) PREVIEW launcher ===
             val previewLauncher = rememberLauncherForActivityResult(
@@ -61,6 +63,7 @@ class CaptureActivity : ComponentActivity() {
                     Activity.RESULT_OK -> {
                         // Confirmó textura → volver a la lista
                         selectedWall = null
+                        refreshKey++
                     }
                     Activity.RESULT_FIRST_USER -> {
                         // Repetir toma
@@ -73,14 +76,17 @@ class CaptureActivity : ComponentActivity() {
             }
 
             // === 2) PREVIEW lambda ===
-            val openPreview: (String?, String?, String) -> Unit = { texturePath, processedPath, wallName ->
-                val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                    putExtra("texturePath", texturePath)
-                    putExtra("processedPath", processedPath)
-                    putExtra("wallName", wallName)
+            val openPreview: (String?, String?, String, String?, String?) -> Unit =
+                { texturePath, processedPath, wallName, packName, packPath ->
+                    val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                        putExtra("texturePath", texturePath)
+                        putExtra("processedPath", processedPath)
+                        putExtra("wallName", wallName)
+                        if (!packName.isNullOrBlank()) putExtra("packName", packName)
+                        if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)
+                    }
+                    previewLauncher.launch(intent)
                 }
-                previewLauncher.launch(intent)
-            }
 
             val chooserLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.StartActivityForResult()
@@ -90,16 +96,19 @@ class CaptureActivity : ComponentActivity() {
                         val albedo = result.data?.getStringExtra("albedoPath")
                         val processed = result.data?.getStringExtra("processedPath")
                         val sourceWall = result.data?.getStringExtra("sourceWall") ?: "Textura"
+                        val packName = result.data?.getStringExtra("packName")   // 👈 nuevo
+                        val packPath = result.data?.getStringExtra("packPath")   // 👈 nuevo
 
-                        val applyTo = pendingTargetWall ?: sourceWall  // 👈 pared destino real
+                        val applyTo = pendingTargetWall ?: sourceWall
 
                         if (albedo != null) {
-                            // Lanza el preview PERO indicando pared destino
                             val intent = Intent(context, PreviewTextureActivity::class.java).apply {
                                 putExtra("texturePath", albedo)
                                 putExtra("processedPath", processed)
-                                putExtra("wallName", sourceWall)     // lo que estás viendo
-                                putExtra("applyToWall", applyTo)      // 👈 a quién se le asigna
+                                putExtra("wallName", sourceWall)
+                                putExtra("applyToWall", applyTo)
+                                if (!packName.isNullOrBlank()) putExtra("packName", packName)   // 👈
+                                if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)   // 👈
                             }
                             previewLauncher.launch(intent)
                         }
@@ -112,7 +121,7 @@ class CaptureActivity : ComponentActivity() {
             }
 
             val openChooser: (String) -> Unit = { targetWall ->
-                pendingTargetWall = targetWall   // 👈 recuerda a qué pared se quiere aplicar
+                pendingTargetWall = targetWall
                 val intent = Intent(context, TextureChooserActivity::class.java).apply {
                     putExtra("targetWall", targetWall)
                 }
@@ -124,7 +133,8 @@ class CaptureActivity : ComponentActivity() {
                 WallListScreen(
                     onWallSelected = { wallName -> selectedWall = wallName },
                     openPreview = openPreview,
-                    openChooser = openChooser
+                    openChooser = openChooser,
+                    refreshKey = refreshKey              // 👈 pásalo a la lista
                 )
             } else {
                 CameraTextureCapture(
@@ -138,8 +148,9 @@ class CaptureActivity : ComponentActivity() {
     @Composable
     fun WallListScreen(
         onWallSelected: (String) -> Unit,
-        openPreview: (String?, String?, String) -> Unit,
-        openChooser: (String) -> Unit
+        openPreview: (String?, String?, String, String?, String?) -> Unit,
+        openChooser: (String) -> Unit,
+        refreshKey: Int
     ) {
         val context = LocalContext.current
 
@@ -154,6 +165,10 @@ class CaptureActivity : ComponentActivity() {
             }
             observer.startWatching()
             onDispose { observer.stopWatching() }
+        }
+
+        LaunchedEffect(refreshKey) {
+            TextureAssignmentStore.loadJson(context)
         }
 
         // 3) Lista
@@ -179,29 +194,80 @@ class CaptureActivity : ComponentActivity() {
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
                             .clickable {
+                                // mantener store al día
+                                TextureAssignmentStore.loadJson(context)
+
+                                fun canonical(name: String) =
+                                    name.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
+
                                 val safe = wall.label.replace(" ", "_")
                                 val thisAlbedo = File(context.cacheDir, "${safe}_Albedo.png")
 
+                                // 1) si ya está el archivo canónico -> preview directo
                                 if (thisAlbedo.exists()) {
-                                    // Ya tiene textura → abrir preview directo
                                     openPreview(
                                         thisAlbedo.absolutePath,
                                         File(context.cacheDir, "${safe}_Processed.jpg").absolutePath,
-                                        wall.label
+                                        wall.label,
+                                        null,   // packName (si quieres: TextureAssignmentStore.getPack(wall.label))
+                                        null    // packPath  (si quieres: TextureAssignmentStore.getPathForWall(wall.label))
                                     )
-                                } else {
-                                    // ¿Hay otras texturas capturadas en caché?
-                                    val hasAnyTexture = (context.cacheDir.listFiles { f ->
-                                        f.isFile && f.name.endsWith("_Albedo.png")
-                                    } ?: emptyArray()).isNotEmpty()
+                                    return@clickable
+                                }
 
-                                    if (hasAnyTexture) {
-                                        // Reutilizar: abrir selector
-                                        openChooser(wall.label)
-                                    } else {
-                                        // No hay ninguna textura → ir a cámara para esta pared
-                                        onWallSelected(wall.label)
+                                // 2) si el JSON dice que esta pared (o equivalente) YA tiene pack, reconstruir y abrir preview
+                                val allWalls = runCatching {
+                                    com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(context)
+                                }.getOrElse {
+                                    com.example.procesamiento3d.RoomDataLoader.loadWalls(context)
+                                }
+                                val baseCanon = canonical(wall.label)
+
+                                val packForThis = TextureAssignmentStore.getPack(wall.label)
+                                    ?: allWalls.firstOrNull { canonical(it.label) == baseCanon }
+                                        ?.let { TextureAssignmentStore.getPack(it.label) }
+
+                                if (packForThis != null) {
+                                    val candidate = (context.cacheDir.listFiles { f ->
+                                        f.isFile && f.name.endsWith("_Albedo.png")
+                                    } ?: emptyArray()).firstOrNull { f ->
+                                        val srcWall = f.name.removeSuffix("_Albedo.png").replace("_", " ")
+                                        TextureAssignmentStore.getPack(srcWall) == packForThis
                                     }
+
+                                    if (candidate != null) {
+                                        try {
+                                            candidate.copyTo(thisAlbedo, overwrite = true)
+                                            val srcProcessed = File(
+                                                context.cacheDir,
+                                                "${candidate.name.removeSuffix("_Albedo.png")}_Processed.jpg"
+                                            )
+                                            val thisProcessed = File(context.cacheDir, "${safe}_Processed.jpg")
+                                            if (srcProcessed.exists()) srcProcessed.copyTo(thisProcessed, overwrite = true)
+
+                                            openPreview(
+                                                thisAlbedo.absolutePath,
+                                                thisProcessed.takeIf { it.exists() }?.absolutePath,
+                                                wall.label,
+                                                null,   // packName (si quieres: TextureAssignmentStore.getPack(wall.label))
+                                                null    // packPath  (si quieres: TextureAssignmentStore.getPathForWall(wall.label))
+                                            )
+                                            return@clickable
+                                        } catch (_: Exception) {
+                                            // sigue al fallback
+                                        }
+                                    }
+                                }
+
+                                // 3) fallback: si hay alguna textura en cache -> chooser; si no, cámara
+                                val hasAnyTexture = (context.cacheDir.listFiles { f ->
+                                    f.isFile && f.name.endsWith("_Albedo.png")
+                                } ?: emptyArray()).isNotEmpty()
+
+                                if (hasAnyTexture) {
+                                    openChooser(wall.label)
+                                } else {
+                                    onWallSelected(wall.label)  // cámara
                                 }
                             }
                     ) {
@@ -213,8 +279,19 @@ class CaptureActivity : ComponentActivity() {
                             Spacer(Modifier.height(6.dp))
 
                             // Hint visual de estado
+                            fun canonical(n: String) = n.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
+
                             val safe = wall.label.replace(" ", "_")
-                            val hasThis = File(context.cacheDir, "${safe}_Albedo.png").exists()
+                            val hasFile = File(context.cacheDir, "${safe}_Albedo.png").exists()
+
+                            val packDirect = TextureAssignmentStore.getPack(wall.label)
+                            val packCanonical = walls.firstOrNull { canonical(it.label) == canonical(wall.label) }
+                                ?.let { TextureAssignmentStore.getPack(it.label) }
+
+                            val hasAssigned = (packDirect != null || packCanonical != null)
+
+                            val hasThis = hasFile || hasAssigned
+
                             val estado = if (hasThis) "Textura capturada" else "Sin textura"
                             Text(
                                 text = estado,
@@ -232,7 +309,7 @@ class CaptureActivity : ComponentActivity() {
     @Composable
     fun CameraTextureCapture(
         wallName: String,
-        openPreview: (String?, String?, String) -> Unit
+        openPreview: (String?, String?, String, String?, String?) -> Unit
     ) {
         val context = LocalContext.current
         val lifecycleOwner = LocalLifecycleOwner.current
@@ -331,10 +408,15 @@ class CaptureActivity : ComponentActivity() {
                                             val textureFile = File(context.cacheDir, "${base}_Albedo.png")
                                             val processedFile = File(context.cacheDir, "${base}_Processed.jpg")
 
+                                            // 👇 carpeta donde TextureProcessor descomprime el pack
+                                            val packPath = File(context.filesDir, "pbrpacks/${textureName}").absolutePath
+
                                             openPreview(
                                                 textureFile.absolutePath,
                                                 processedFile.absolutePath,
-                                                wallName
+                                                wallName,
+                                                textureName,  // packName real
+                                                packPath      // ruta real del pack
                                             )
                                         } else {
                                             Toast.makeText(context, "❌ No se pudo determinar textura.", Toast.LENGTH_SHORT).show()

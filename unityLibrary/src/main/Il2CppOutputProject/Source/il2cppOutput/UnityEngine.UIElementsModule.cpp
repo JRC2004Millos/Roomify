@@ -12627,7 +12627,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BindingResult_t8B7B654A3357F5E8F5B0E4CB4AB907
 		Type_t* L_2 = V_0;
 		NullCheck(L_2);
 		bool L_3;
-		L_3 = VirtualFuncInvoker0< bool >::Invoke(70, L_2);
+		L_3 = VirtualFuncInvoker0< bool >::Invoke(68, L_2);
 		V_1 = L_3;
 		bool L_4 = V_1;
 		if (!L_4)
@@ -12646,7 +12646,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR BindingResult_t8B7B654A3357F5E8F5B0E4CB4AB907
 		(L_7)->SetAt(static_cast<il2cpp_array_size_t>(0), (Type_t*)L_8);
 		NullCheck(L_5);
 		MethodInfo_t* L_9;
-		L_9 = VirtualFuncInvoker1< MethodInfo_t*, TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(42, L_5, L_7);
+		L_9 = VirtualFuncInvoker1< MethodInfo_t*, TypeU5BU5D_t97234E1129B564EB38B8D85CAC2AD8B5B9522FFB* >::Invoke(40, L_5, L_7);
 		V_2 = L_9;
 		MethodInfo_t* L_10 = V_2;
 		DataBinding_t4AEDF779EB49F9E11B45F99385482936B2FC34DA* L_11 = ___1_binding;
@@ -13018,7 +13018,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* BindingUpdater_GetVisitationErrorSt
 		L_2 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_1, NULL);
 		NullCheck(L_2);
 		String_t* L_3;
-		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_2);
+		L_3 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_2);
 		BindingContext_t778372EB4EF18CA90841DA499159C1A391D470E2* L_4 = ___1_context;
 		BindingId_t8BBB6188CD126EACCA07816C78760E92DC16620E L_5;
 		L_5 = BindingContext_get_bindingId_m73A0DE3066DB8AE9C59B51128E1A164DAB4E7B80_inline(L_4, NULL);
@@ -13171,7 +13171,7 @@ IL_0017:
 		L_6 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_5, NULL);
 		NullCheck(L_6);
 		String_t* L_7;
-		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_6);
+		L_7 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_6);
 		G_B3_0 = L_7;
 		G_B3_1 = G_B2_0;
 		G_B3_2 = G_B2_1;
@@ -13290,7 +13290,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* BindingUpdater_GetRootDataSourceErr
 		L_1 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_0, NULL);
 		NullCheck(L_1);
 		String_t* L_2;
-		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_1);
+		L_2 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_1);
 		String_t* L_3;
 		L_3 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteralDC32F4CE8FED80DE91BE97CC541D29FEA435CF38, L_2, _stringLiteral4F03B9215774B20DE143118AED8E7D94AD531DD4, NULL);
 		V_0 = L_3;
@@ -25378,7 +25378,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR MethodInfo_t* DataBinding_CacheReflectionInfo
 		L_1 = Type_GetTypeFromHandle_m6062B81682F79A4D6DF2640692EE6D9987858C57(L_0, NULL);
 		NullCheck(L_1);
 		MethodInfoU5BU5D_tDF3670604A0AECF814A0B0BA09B91FBF0D6A3265* L_2;
-		L_2 = VirtualFuncInvoker1< MethodInfoU5BU5D_tDF3670604A0AECF814A0B0BA09B91FBF0D6A3265*, int32_t >::Invoke(102, L_1, ((int32_t)36));
+		L_2 = VirtualFuncInvoker1< MethodInfoU5BU5D_tDF3670604A0AECF814A0B0BA09B91FBF0D6A3265*, int32_t >::Invoke(97, L_1, ((int32_t)36));
 		V_0 = L_2;
 		V_1 = 0;
 		goto IL_0058;
@@ -25395,7 +25395,7 @@ IL_0018:
 		MethodInfo_t* L_7 = V_2;
 		NullCheck(L_7);
 		String_t* L_8;
-		L_8 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_7);
+		L_8 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_7);
 		bool L_9;
 		L_9 = String_op_Inequality_m8C940F3CFC42866709D7CA931B3D77B4BE94BCB6(L_8, _stringLiteral2F71322FD544CE52F6DFBEF8422C8C57395126BB, NULL);
 		V_3 = L_9;
@@ -25414,7 +25414,7 @@ IL_0033:
 		MethodInfo_t* L_11 = V_2;
 		NullCheck(L_11);
 		ParameterInfoU5BU5D_t86995AB4A1693393FE29B058CC3FD727DF0B984C* L_12;
-		L_12 = VirtualFuncInvoker0< ParameterInfoU5BU5D_t86995AB4A1693393FE29B058CC3FD727DF0B984C* >::Invoke(16, L_11);
+		L_12 = VirtualFuncInvoker0< ParameterInfoU5BU5D_t86995AB4A1693393FE29B058CC3FD727DF0B984C* >::Invoke(15, L_11);
 		NullCheck(L_12);
 		V_4 = (bool)((((int32_t)((((int32_t)((int32_t)(((RuntimeArray*)L_12)->max_length))) == ((int32_t)2))? 1 : 0)) == ((int32_t)0))? 1 : 0);
 		bool L_13 = V_4;
@@ -26363,7 +26363,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DataBindingManager_RegisterBinding_m3347
 		L_5 = Object_GetType_mE10A8FC1E57F3DF29972CCBC026C2DC3942263B3(L_4, NULL);
 		NullCheck(L_5);
 		String_t* L_6;
-		L_6 = VirtualFuncInvoker0< String_t* >::Invoke(8, L_5);
+		L_6 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_5);
 		String_t* L_7;
 		L_7 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral5DB0257B8DAC4921AE377FAB4C1CE71957E8F692, L_6, _stringLiteralB74B7DEE6A6329C38B29E8E839A52C2F04198EA6, NULL);
 		Assert_IsFalse_mC11212C418E6B5009F6474AE90FFB24734482E56(L_3, L_7, NULL);

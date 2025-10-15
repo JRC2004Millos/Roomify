@@ -26846,7 +26846,7 @@ IL_001e:
 		L_7 = String_op_Implicit_m7D7FE0449303AF92D8B2A85A06ADC6933B2ECC3A_inline(L_6, NULL);
 		NullCheck(L_5);
 		int32_t L_8;
-		L_8 = VirtualFuncInvoker1< int32_t, ReadOnlySpan_1_t59614EA6E51A945A32B02AB17FBCBDF9A5C419C1 >::Invoke(38, L_5, L_7);
+		L_8 = VirtualFuncInvoker1< int32_t, ReadOnlySpan_1_t59614EA6E51A945A32B02AB17FBCBDF9A5C419C1 >::Invoke(37, L_5, L_7);
 		G_B6_0 = L_8;
 		G_B6_1 = G_B5_0;
 	}
@@ -37374,7 +37374,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t DelegateHashCodeUtils_Get
 		L_10 = Delegate_get_Method_mB684A7525653DFE0EFC35E58449E1FC8E2A9F019(L_9, NULL);
 		NullCheck(L_10);
 		Type_t* L_11;
-		L_11 = VirtualFuncInvoker0< Type_t* >::Invoke(9, L_10);
+		L_11 = VirtualFuncInvoker0< Type_t* >::Invoke(8, L_10);
 		Type_t* L_12 = L_11;
 		if (L_12)
 		{
@@ -37410,7 +37410,7 @@ IL_003f:
 		L_15 = Delegate_get_Method_mB684A7525653DFE0EFC35E58449E1FC8E2A9F019(L_14, NULL);
 		NullCheck(L_15);
 		Type_t* L_16;
-		L_16 = VirtualFuncInvoker0< Type_t* >::Invoke(9, L_15);
+		L_16 = VirtualFuncInvoker0< Type_t* >::Invoke(8, L_15);
 		RuntimeTypeHandle_t332A452B8B6179E4469B69525D0FE82A88030F7B L_17 = { reinterpret_cast<intptr_t> (CompilerGeneratedAttribute_t0153EC5D2142E566E2D896C49F598756BCAEE771_0_0_0_var) };
 		il2cpp_codegen_runtime_class_init_inline(il2cpp_defaults.systemtype_class);
 		Type_t* L_18;
