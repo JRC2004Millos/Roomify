@@ -110,7 +110,10 @@ class MainActivity : ComponentActivity() {
 
                         Button(
                             onClick = {
-                                startActivity(Intent(this@MainActivity, com.unity3d.player.UnityPlayerActivity::class.java))
+                                startActivity(
+                                    Intent(this@MainActivity, com.unity3d.player.UnityPlayerActivity::class.java)
+                                        .putExtra("SCENE_TO_LOAD", "SampleScene")
+                                )
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp)
