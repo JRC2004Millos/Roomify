@@ -10,18 +10,6 @@ dependencies {
     implementation project(':unityLibrary:xrmanifest.androidlib')
 }
 
-// Lee -PunityStreamingAssets si te lo pasan por línea de comandos; si no, vacío
-def unityStreamingAssetsRaw = (project.findProperty('unityStreamingAssets') ?: "") as String
-
-// Construye la lista final para noCompress
-def noCompressList = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp']
-if (unityStreamingAssetsRaw.trim()) {
-    // Admite "a,b,c" o "a, b, c"
-    noCompressList.addAll(
-            unityStreamingAssetsRaw.split(/\s*,\s*/).findAll { it?.trim() }
-    )
-}
-
 android {
     namespace "com.unity3d.player"
     ndkPath "C:/Program Files/Unity/Hub/Editor/6000.1.7f1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
@@ -53,7 +41,7 @@ android {
 
     androidResources {
         ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
-        noCompress = noCompressList
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'] + unityStreamingAssets.tokenize(', ')
     }
 
     packaging {
@@ -62,6 +50,8 @@ android {
         }
     }
 }
+
+
 
 def getSdkDir() {
     Properties local = new Properties()
@@ -154,4 +144,4 @@ android {
             jni.srcDirs = ["src/main/Il2CppOutputProject"]
         }
     }
-}
+}

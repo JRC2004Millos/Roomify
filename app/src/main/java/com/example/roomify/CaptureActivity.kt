@@ -568,9 +568,7 @@ class CaptureActivity : ComponentActivity() {
         val i = Intent(ctx, UnityPlayerActivity::class.java).apply {
             putExtra("SCENE_TO_LOAD", "RenderScene")
             putExtra("TEXTURES_JSON_PATH", textures.absolutePath)
-            putExtra("PBR_PACKS_ROOT", packsRoot.absolutePath) // opcional si cada item.path ya es absoluto
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            putExtra("PBR_PACKS_ROOT", packsRoot.absolutePath)
         }
         ctx.startActivity(i)
     }
