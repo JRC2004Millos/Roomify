@@ -42,6 +42,7 @@ import com.example.roomify.storage.TextureAssignmentStore
 import android.content.Context
 import android.content.Intent
 import com.unity3d.player.UnityPlayerActivity
+import android.os.SystemClock
 
 class CaptureActivity : ComponentActivity() {
 
@@ -338,18 +339,18 @@ class CaptureActivity : ComponentActivity() {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val assignedCount = expectedSurfaceKeys(walls).size - completeness.missing.size
+                    /*val assignedCount = expectedSurfaceKeys(walls).size - completeness.missing.size
                     Text(
                         text = if (completeness.isComplete)
                             "Listo para ver en 3D"
                         else
                             "Asignadas $assignedCount / ${expectedSurfaceKeys(walls).size}",
-                        modifier = Modifier.weight(1f) // 👈 FALTABA ESTA COMA ANTES
-                    )
+                        modifier = Modifier.weight(1f)
+                    )*/
                     val ctx = LocalContext.current
                     Button(
                         onClick = { openUnityPreviewNow(ctx) }, // 👈 ahora coincide con la firma de abajo
-                        enabled = completeness.isComplete
+                        //enabled = completeness.isComplete
                     ) { Text("Ver en 3D") }
                 }
             }
@@ -557,19 +558,37 @@ class CaptureActivity : ComponentActivity() {
     }
 
     private fun openUnityPreviewNow(ctx: Context) {
-        val textures = File(ctx.filesDir, "textures_model.json")
-        val packsRoot = File(ctx.filesDir, "pbrpacks")
+        try {
+            // 1️⃣ Guardar el JSON actualizado con todas las asignaciones
+            TextureAssignmentStore.saveJson(ctx)
 
-        if (!textures.exists()) {
-            Toast.makeText(ctx, "Falta textures_model.json", Toast.LENGTH_SHORT).show()
-            return
-        }
+            // 2️⃣ Verificar existencia y tamaño del archivo
+            val jsonFile = File(ctx.getExternalFilesDir(null), "textures_model.json")
+            val exists = jsonFile.exists()
+            val size = jsonFile.length()
+            Log.d("CaptureActivity", "✅ Textures JSON guardado en: ${jsonFile.absolutePath}, exists=$exists, size=$size bytes")
 
-        val i = Intent(ctx, UnityPlayerActivity::class.java).apply {
-            putExtra("SCENE_TO_LOAD", "RenderScene")
-            putExtra("TEXTURES_JSON_PATH", textures.absolutePath)
-            putExtra("PBR_PACKS_ROOT", packsRoot.absolutePath)
+            // Si no existe o está vacío, lanza warning y cancela
+            if (!exists || size == 0L) {
+                Log.e("CaptureActivity", "❌ textures_model.json no existe o está vacío. Abortando apertura de Unity.")
+                Toast.makeText(ctx, "Error: el archivo de texturas no se generó correctamente.", Toast.LENGTH_LONG).show()
+                return
+            }
+
+            // 3️⃣ Crear la intent a Unity con las rutas
+            val packsRoot = File(ctx.filesDir, "pbrpacks")
+            SystemClock.sleep(250)
+            val intent = Intent(ctx, UnityPlayerActivity::class.java).apply {
+                putExtra("SCENE_TO_LOAD", "RenderScene")
+                putExtra("PBR_PACKS_ROOT", packsRoot.absolutePath)
+            }
+
+            Log.d("CaptureActivity", "🎮 Lanzando Unity con PBR_PACKS_ROOT=${packsRoot.absolutePath}")
+            ctx.startActivity(intent)
+
+        } catch (e: Exception) {
+            Log.e("CaptureActivity", "⚠️ Error preparando Unity: ${e.message}", e)
+            Toast.makeText(ctx, "Error al abrir Unity: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        ctx.startActivity(i)
     }
 }
