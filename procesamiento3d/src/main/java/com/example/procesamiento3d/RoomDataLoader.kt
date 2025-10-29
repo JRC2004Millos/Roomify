@@ -57,8 +57,8 @@ object RoomDataLoader {
             result.add(WallInfo(label, from, to, dir))
         }
 
-        result.add(WallInfo("Piso", "all", "all", "floor"))
-        result.add(WallInfo("Techo", "all", "all", "ceiling"))
+        result.add(WallInfo("piso", "all", "all", "floor"))
+        result.add(WallInfo("techo", "all", "all", "ceiling"))
         return result
     }
 

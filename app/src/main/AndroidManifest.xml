@@ -46,7 +46,10 @@
         <activity
             android:name=".CargaActivity" />
         <activity
-            android:name=".CaptureActivity" />
+            android:name=".CaptureActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            />
         <activity
             android:name=".TextureChooserActivity"
             android:exported="false"

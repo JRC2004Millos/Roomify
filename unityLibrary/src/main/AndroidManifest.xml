@@ -14,12 +14,39 @@
     <meta-data android:name="unity.auto-report-fully-drawn" android:value="true" />
     <meta-data android:name="unity.auto-set-game-state" android:value="true" />
     <meta-data android:name="unity.strip-engine-code" android:value="false" />
-    <activity android:configChanges="mcc|mnc|locale|touchscreen|keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize|fontScale|layoutDirection|density" android:enabled="true" android:exported="true" android:hardwareAccelerated="false" android:launchMode="singleTop" android:name="com.unity3d.player.UnityPlayerActivity" android:resizeableActivity="true" android:screenOrientation="portrait" android:theme="@style/UnityThemeSelector">
-      <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
-      <meta-data android:name="WindowManagerPreference:FreeformWindowSize" android:value="@string/FreeformWindowSize_maximize" />
-      <meta-data android:name="WindowManagerPreference:FreeformWindowOrientation" android:value="@string/FreeformWindowOrientation_portrait" />
-      <meta-data android:name="notch_support" android:value="true" />
-      <layout android:minHeight="300px" android:minWidth="400px" />
+    <activity
+        android:name="com.unity3d.player.UnityPlayerActivity"
+        android:exported="true"
+        android:enabled="true"
+        android:hardwareAccelerated="true"
+        android:launchMode="singleTask"
+        android:resizeableActivity="true"
+        android:screenOrientation="portrait"
+        android:configChanges="mcc|mnc|locale|layoutDirection|fontScale|keyboard|keyboardHidden|navigation|orientation|screenLayout|screenSize|smallestScreenSize|density|uiMode"
+        android:theme="@style/UnityThemeSelector"
+        android:enableOnBackInvokedCallback="true"
+        android:taskAffinity=""
+        android:excludeFromRecents="true"
+        android:finishOnTaskLaunch="true">
+
+      <meta-data
+          android:name="unityplayer.UnityActivity"
+          android:value="true" />
+
+      <meta-data
+          android:name="notch_support"
+          android:value="true" />
+
+      <meta-data
+          android:name="WindowManagerPreference:FreeformWindowSize"
+          android:value="@string/FreeformWindowSize_maximize" />
+      <meta-data
+          android:name="WindowManagerPreference:FreeformWindowOrientation"
+          android:value="@string/FreeformWindowOrientation_portrait" />
+
+      <layout
+          android:minHeight="300px"
+          android:minWidth="400px" />
     </activity>
     <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="true" />
     <meta-data android:name="com.google.ar.core" android:value="required" />
