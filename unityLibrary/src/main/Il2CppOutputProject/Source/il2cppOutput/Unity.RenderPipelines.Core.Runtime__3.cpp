@@ -5563,7 +5563,7 @@ IL_000f:
 		HelpURLAttribute_tC499F826613B34E001AEAE5D42BA2B3AD365E91D* L_4 = V_0;
 		NullCheck(L_4);
 		String_t* L_5;
-		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(4, L_4);
+		L_5 = VirtualFuncInvoker0< String_t* >::Invoke(7, L_4);
 		G_B3_0 = L_5;
 		G_B3_1 = G_B2_0;
 	}
