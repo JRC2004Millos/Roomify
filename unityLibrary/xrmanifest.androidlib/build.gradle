@@ -8,10 +8,10 @@ dependencies {
 android {
     namespace "com.UnityTechnologies.XR.Manifest"
     compileSdk 36
-    buildToolsVersion = "36.0.0"
+    buildToolsVersion = "34.0.0"
 
     defaultConfig {
-        minSdk 24
+        minSdk 29
         targetSdk 36
     }
 

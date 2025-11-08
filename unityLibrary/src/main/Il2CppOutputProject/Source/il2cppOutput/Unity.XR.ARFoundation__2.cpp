@@ -108,23 +108,28 @@ IL2CPP_EXTERN_C RuntimeClass* Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_i
 IL2CPP_EXTERN_C RuntimeClass* Pose_t06BA69EAA6E9FAF60056D519A87D25F54AFE7971_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* RenderTexture_tBA90C4C3AD9EECCFDDCC632D97C29FAB80D60D27_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* SubsystemUtils_tFF1F0FE7CEE872559AAF7091C8EA14E6BEF3308B_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* TextureFormat_t87A73E4A3850D3410DC211676FC14B94226C1C1D_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* UpdatableCubemap_tE26FA12BD68D6F594E625CA2DC5C07468BAB0C2B_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* UpdatableRenderTextureRef_t5E5CE910D82FB1FFBB57535D87E0E27E84332FD7_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* UpdatableTexture2D_tE263BF1B4FC1B3108ACBD8D36E8FB4D9EAA21FE4_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* UpdatableTexture3D_tEE92637F4646F130B8748199CF9AA37F6CE0BCCB_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C RuntimeClass* XRTextureType_t5591061F923F907341986D46F0322DE15DCB9955_il2cpp_TypeInfo_var;
 IL2CPP_EXTERN_C String_t* _stringLiteral0BACDB8A210E40B360D778D202F96BBC2CB94622;
 IL2CPP_EXTERN_C String_t* _stringLiteral17A7BA088490CA1D9307C4F7F07BDC92703EDF51;
+IL2CPP_EXTERN_C String_t* _stringLiteral1DA18FB1BF5C06826DF31AE85A772E59B46AE39C;
 IL2CPP_EXTERN_C String_t* _stringLiteral3C69590A4ADA6674E5639E68F0EE68C96FBC18EB;
+IL2CPP_EXTERN_C String_t* _stringLiteral4912B8BFA399C983B66771EA048A65169929756C;
+IL2CPP_EXTERN_C String_t* _stringLiteral4D4F7100A6B2DF8C430B9D46941640112B019240;
 IL2CPP_EXTERN_C String_t* _stringLiteral4EBC86E0EACFCA522AEB82874860D0E248D782A5;
 IL2CPP_EXTERN_C String_t* _stringLiteral5691E611847F2E4ED84662301081444D5C4C06FC;
-IL2CPP_EXTERN_C String_t* _stringLiteral6B74D5B25F0300D520C9F67BC65BBBED84FD4BE8;
 IL2CPP_EXTERN_C String_t* _stringLiteral7A4A6E2A7090298F814A9D44C89F8634249BEF07;
 IL2CPP_EXTERN_C String_t* _stringLiteral7B13D456FF5BCD76E163AE5661138A73F6FBFB44;
 IL2CPP_EXTERN_C String_t* _stringLiteral7DCC6569C2F6EC43635C15A4446068D2FE1897D5;
 IL2CPP_EXTERN_C String_t* _stringLiteralA39FBB6C10924A5DCDE17E3D21CA72346095F55C;
+IL2CPP_EXTERN_C String_t* _stringLiteralAEBCD235F115FD78D0A6F187C179E9D170D57846;
 IL2CPP_EXTERN_C String_t* _stringLiteralB10970956AF3C566E424D4894232687755A24E2B;
 IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponent_TisImage_tBC1D03F63BF71132E9A5E472B8742F172A011E7E_mE74EE63C85A63FC34DCFC631BC229207B420BC79_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* Enumerator_Dispose_m45822E4B1A37F736297A1E4E82C187675E4570F4_RuntimeMethod_var;
@@ -145,7 +150,8 @@ IL2CPP_EXTERN_C const RuntimeMethod* TransformExtensions_TransformPointList_m7C2
 IL2CPP_EXTERN_C const RuntimeMethod* TransformExtensions_TransformRay_m34136D03EFA2C12718B4F8EC879C293E405D7AB5_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* UpdatableCubemap__ctor_m1D2EA5C2129CF380B8099FEFB0171A795E540960_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* UpdatableRenderTextureRef__ctor_mAD1424FE8866E0B196BD7AD653E53640C3694FE6_RuntimeMethod_var;
-IL2CPP_EXTERN_C const RuntimeMethod* UpdatableRenderTexture__ctor_m4A85C6A1D7B7312C442F18266FA12F0A012B8592_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* UpdatableRenderTexture_ToUnityXRDepthTextureFormat_m7FB86A71F68BE966F6A5AE8993B74191106DD1EA_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* UpdatableRenderTexture_ToUnityXRRenderTextureFormat_mF42C697942D423B9D9A115A6F1509502895C3CB0_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* UpdatableTexture2D__ctor_m20101CCEB719263249B415B26A04AB86154A9911_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* UpdatableTexture3D__ctor_m99D8638F92064D0D5849D98BB58DED6DF4448D39_RuntimeMethod_var;
 IL2CPP_EXTERN_C const RuntimeMethod* UpdatableTextureFactory_Create_m03A2D163708779A2EA46A9BC809BDAD7DE021C70_RuntimeMethod_var;
@@ -487,6 +493,23 @@ struct TrackingMode_tC095904BA2A31037812CC727FBDCC76D11D300B2
 {
 	int32_t ___value__;
 };
+struct UnityXRDepthTextureFormat_t77E228DB48E86D61B31C95738247F4BADF9ECFFF 
+{
+	int32_t ___value__;
+};
+struct UnityXRRenderTextureFormat_tD7E48954F99A5BC6B62F0ABA8343E6669CDA1F8D 
+{
+	int32_t ___value__;
+};
+struct UnityXRShadingRateFormat_t5D2747158AC735DEF40873180253A05FDB09546F 
+{
+	int32_t ___value__;
+};
+struct UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 
+{
+	intptr_t ___nativePtr;
+	uint32_t ___referenceTextureId;
+};
 struct XRTextureType_t5591061F923F907341986D46F0322DE15DCB9955 
 {
 	int32_t ___value__;
@@ -519,6 +542,19 @@ struct SystemException_tCC48D868298F4C0705279823E34B00F4FBDB7295  : public Excep
 };
 struct Texture_t791CBB51219779964E0E8A2ED7C1AA5F92A4A700  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
 {
+};
+struct UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 
+{
+	int32_t ___colorFormat;
+	UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 ___color;
+	int32_t ___depthFormat;
+	UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 ___depth;
+	int32_t ___shadingRateFormat;
+	UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 ___shadingRate;
+	uint32_t ___width;
+	uint32_t ___height;
+	uint32_t ___textureArrayLength;
+	uint32_t ___flags;
 };
 struct XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 
 {
@@ -811,18 +847,24 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool XRTextureDescriptor_hasIdenticalTextureM
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Cubemap_UpdateExternalTexture_m6065B8D7B4B70C31AAA64DD142B96ADFAD74C53E (Cubemap_t4F2DFF70696A5CB5C1695DF8947CC60D718C4A1C* __this, intptr_t ___0_nativeTexture, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UnityObjectUtils_Destroy_mFA9A21EE17656D12F1B126AD9C2CC4EDFD35F157 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_obj, bool ___1_withUndo, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableCubemap_DestroyTexture_m173B3CF4E8E616F48BEE6329B86CD73CD9BC3EED (UpdatableCubemap_tE26FA12BD68D6F594E625CA2DC5C07468BAB0C2B* __this, const RuntimeMethod* method) ;
-IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* __this, String_t* ___0_message, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture_RequestCreateTexture_mBD408EE205EEDDDE099BF41AF8186B50C7C8FE29 (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_newDescriptor, const RuntimeMethod* method) ;
 inline bool SubsystemUtils_TryGetLoadedIntegratedSubsystem_TisXRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1_mE5C840511603A0A3144D8764F6394D8D2A0447A0 (XRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1** ___0_subsystem, const RuntimeMethod* method)
 {
 	return ((  bool (*) (XRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1**, const RuntimeMethod*))SubsystemUtils_TryGetLoadedIntegratedSubsystem_TisRuntimeObject_m0DD34D9C8F2962E3E9FCB50F6FC8578341A96FA4_gshared)(___0_subsystem, method);
 }
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Debug_LogError_mB00B2B4468EF3CAF041B038D840820FB84C924B2 (RuntimeObject* ___0_message, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 UpdatableRenderTexture_ToUnityXRRenderTextureDesc_mDC651296313E7C6F59C0206AA3B8EE31A11E865B (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_descriptor, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool UnityXRDisplay_CreateTexture_mBED30D3240F84865135500F3428BE9E59A848A0D (UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 ___0_desc, uint32_t* ___1_id, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RenderTexture_tBA90C4C3AD9EECCFDDCC632D97C29FAB80D60D27* XRDisplaySubsystem_GetRenderTexture_mABB964AEAFF9B12DB279EDECAE85A52F6253E5CA (XRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1* __this, uint32_t ___0_unityXrRenderTextureId, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_x, Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___1_y, const RuntimeMethod* method) ;
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_propertyNameId_mF5A620F0DAEE746BDD293DB7F02909FB5404DCC1_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture_DestroyTexture_m69F29C795B8BD67AB5610DB4FD78CCB72E805ECC (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, const RuntimeMethod* method) ;
-IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture_RequestCreateTexture_mBD408EE205EEDDDE099BF41AF8186B50C7C8FE29 (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_newDescriptor, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool UpdatableRenderTexture_TryRetrieveTexture_mF45934EC2ADFF20DF07DD2E238DA80F99499D7E7 (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_height_mC0B37241C24FA883E2594B9411080EDF654E3E01_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_depth_m5885EBF7D767C918B1483D63D1B11EE60D939E7D_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UpdatableRenderTexture_ToUnityXRDepthTextureFormat_m7FB86A71F68BE966F6A5AE8993B74191106DD1EA (int32_t ___0_textureFormat, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UpdatableRenderTexture_ToUnityXRRenderTextureFormat_mF42C697942D423B9D9A115A6F1509502895C3CB0 (int32_t ___0_textureFormat, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* __this, String_t* ___0_message, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool UpdatableRenderTextureRef_TryUpdateFromDescriptor_m321EE0FFDDF62250CEEF4E2FD47DC933D6E82B0D (UpdatableRenderTextureRef_t5E5CE910D82FB1FFBB57535D87E0E27E84332FD7* __this, XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_newDescriptor, const RuntimeMethod* method) ;
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool IntPtr_op_Equality_m7D9CDCDE9DC2A0C2C614633F4921E90187FAB271_inline (intptr_t ___0_value1, intptr_t ___1_value2, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GCHandle_tC44F6F72EE68BD4CFABA24309DA7A179D41127DC GCHandle_FromIntPtr_mA7848A4285D007CADC52B6272DB243C8FDFD5FAC (intptr_t ___0_value, const RuntimeMethod* method) ;
@@ -830,8 +872,6 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* GCHandle_get_Targe
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GCHandle_Free_m1320A260E487EB1EA6D95F9E54BFFCB5A4EF83A3 (GCHandle_tC44F6F72EE68BD4CFABA24309DA7A179D41127DC* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t RenderTexture_GetNativeDepthBufferPtr_m91ABE370D80032F6CD798F717D5556817587B2DD (RenderTexture_tBA90C4C3AD9EECCFDDCC632D97C29FAB80D60D27* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t Texture_GetNativeTexturePtr_mD3019CC9461338665885D431B86C03D3063867EE (Texture_t791CBB51219779964E0E8A2ED7C1AA5F92A4A700* __this, const RuntimeMethod* method) ;
-IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_height_mC0B37241C24FA883E2594B9411080EDF654E3E01_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) ;
-IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_depth_m5885EBF7D767C918B1483D63D1B11EE60D939E7D_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRTextureDescriptor__ctor_m2FB1D1538997C870AB8282291C6DA87DD5FEBFBA (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, intptr_t ___0_nativeTexture, int32_t ___1_width, int32_t ___2_height, int32_t ___3_mipmapCount, int32_t ___4_format, int32_t ___5_propertyNameId, int32_t ___6_depth, int32_t ___7_textureType, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Texture2D_tE6505BC111DD8A424A9DBE8E05D7D09E11FFFCF4* UpdatableTexture2D_CreateTextureFromDescriptor_m3F5318FB33716DE16466C71DD01B1E2D8611E84F (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_descriptor, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Texture2D_tE6505BC111DD8A424A9DBE8E05D7D09E11FFFCF4* Texture2D_CreateExternalTexture_mF821F07B386D19D124696C9A6F6EBEA84212B112 (int32_t ___0_width, int32_t ___1_height, int32_t ___2_format, bool ___3_mipChain, bool ___4_linear, intptr_t ___5_nativeTex, const RuntimeMethod* method) ;
@@ -1440,14 +1480,69 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture__ctor_m4A85C6A1D7
 {
 	{
 		Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2(__this, NULL);
-		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_0 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
-		NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B(L_0, ((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral6B74D5B25F0300D520C9F67BC65BBBED84FD4BE8)), NULL);
-		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&UpdatableRenderTexture__ctor_m4A85C6A1D7B7312C442F18266FA12F0A012B8592_RuntimeMethod_var)));
+		XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 L_0 = ___0_descriptor;
+		UpdatableRenderTexture_RequestCreateTexture_mBD408EE205EEDDDE099BF41AF8186B50C7C8FE29(__this, L_0, NULL);
+		return;
 	}
 }
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture_RequestCreateTexture_mBD408EE205EEDDDE099BF41AF8186B50C7C8FE29 (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_newDescriptor, const RuntimeMethod* method) 
 {
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
 	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SubsystemUtils_TryGetLoadedIntegratedSubsystem_TisXRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1_mE5C840511603A0A3144D8764F6394D8D2A0447A0_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SubsystemUtils_tFF1F0FE7CEE872559AAF7091C8EA14E6BEF3308B_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral4912B8BFA399C983B66771EA048A65169929756C);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralAEBCD235F115FD78D0A6F187C179E9D170D57846);
+		s_Il2CppMethodInitialized = true;
+	}
+	XRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1* V_0 = NULL;
+	{
+		il2cpp_codegen_runtime_class_init_inline(SubsystemUtils_tFF1F0FE7CEE872559AAF7091C8EA14E6BEF3308B_il2cpp_TypeInfo_var);
+		bool L_0;
+		L_0 = SubsystemUtils_TryGetLoadedIntegratedSubsystem_TisXRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1_mE5C840511603A0A3144D8764F6394D8D2A0447A0((&V_0), SubsystemUtils_TryGetLoadedIntegratedSubsystem_TisXRDisplaySubsystem_t4B00B0BF1894A039ACFA8DDC2C2EB9301118C1F1_mE5C840511603A0A3144D8764F6394D8D2A0447A0_RuntimeMethod_var);
+		if (L_0)
+		{
+			goto IL_0014;
+		}
+	}
+	{
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogError_mB00B2B4468EF3CAF041B038D840820FB84C924B2(_stringLiteral4912B8BFA399C983B66771EA048A65169929756C, NULL);
+		return;
+	}
+
+IL_0014:
+	{
+		XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 L_1 = ___0_newDescriptor;
+		UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 L_2;
+		L_2 = UpdatableRenderTexture_ToUnityXRRenderTextureDesc_mDC651296313E7C6F59C0206AA3B8EE31A11E865B(L_1, NULL);
+		uint32_t* L_3 = (uint32_t*)(&__this->___m_RenderTextureId);
+		bool L_4;
+		L_4 = UnityXRDisplay_CreateTexture_mBED30D3240F84865135500F3428BE9E59A848A0D(L_2, L_3, NULL);
+		if (!L_4)
+		{
+			goto IL_0036;
+		}
+	}
+	{
+		__this->___m_IsCreateRequested = (bool)1;
+		XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 L_5 = ___0_newDescriptor;
+		__this->___m_Descriptor = L_5;
+		return;
+	}
+
+IL_0036:
+	{
+		XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 L_6 = __this->___m_Descriptor;
+		XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 L_7 = L_6;
+		RuntimeObject* L_8 = Box(XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19_il2cpp_TypeInfo_var, &L_7);
+		String_t* L_9;
+		L_9 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(_stringLiteralAEBCD235F115FD78D0A6F187C179E9D170D57846, L_8, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogError_mB00B2B4468EF3CAF041B038D840820FB84C924B2(L_9, NULL);
 		return;
 	}
 }
@@ -1621,6 +1716,208 @@ IL_0081:
 IL_0090:
 	{
 		return (bool)0;
+	}
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 UpdatableRenderTexture_ToUnityXRRenderTextureDesc_mDC651296313E7C6F59C0206AA3B8EE31A11E865B (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19 ___0_descriptor, const RuntimeMethod* method) 
+{
+	UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 V_1;
+	memset((&V_1), 0, sizeof(V_1));
+	int32_t V_2 = 0;
+	UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 V_3;
+	memset((&V_3), 0, sizeof(V_3));
+	{
+		il2cpp_codegen_initobj((&V_1), sizeof(UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267));
+		(&V_1)->___shadingRateFormat = 0;
+		UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411* L_0 = (UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411*)(&(&V_1)->___shadingRate);
+		il2cpp_codegen_initobj(L_0, sizeof(UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411));
+		int32_t L_1;
+		L_1 = XRTextureDescriptor_get_width_m570472F03994BC63F21751414105A2E0C112DBF2_inline((&___0_descriptor), NULL);
+		(&V_1)->___width = L_1;
+		int32_t L_2;
+		L_2 = XRTextureDescriptor_get_height_mC0B37241C24FA883E2594B9411080EDF654E3E01_inline((&___0_descriptor), NULL);
+		(&V_1)->___height = L_2;
+		int32_t L_3;
+		L_3 = XRTextureDescriptor_get_depth_m5885EBF7D767C918B1483D63D1B11EE60D939E7D_inline((&___0_descriptor), NULL);
+		(&V_1)->___textureArrayLength = L_3;
+		(&V_1)->___flags = 0;
+		(&V_1)->___colorFormat = ((int32_t)66);
+		(&V_1)->___depthFormat = 3;
+		UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 L_4 = V_1;
+		V_0 = L_4;
+		int32_t L_5;
+		L_5 = XRTextureDescriptor_get_textureType_mFF8AB17FA0F69B07F4DEE4C06C776662AF2F2587((&___0_descriptor), NULL);
+		V_2 = L_5;
+		int32_t L_6 = V_2;
+		if ((((int32_t)L_6) == ((int32_t)4)))
+		{
+			goto IL_00a5;
+		}
+	}
+	{
+		int32_t L_7 = V_2;
+		if ((!(((uint32_t)L_7) == ((uint32_t)5))))
+		{
+			goto IL_00d6;
+		}
+	}
+	{
+		int32_t L_8;
+		L_8 = XRTextureDescriptor_get_format_mA745AA87046D4FE4846C11B8285B980FF6DDDD1A_inline((&___0_descriptor), NULL);
+		int32_t L_9;
+		L_9 = UpdatableRenderTexture_ToUnityXRDepthTextureFormat_m7FB86A71F68BE966F6A5AE8993B74191106DD1EA(L_8, NULL);
+		(&V_0)->___depthFormat = L_9;
+		il2cpp_codegen_initobj((&V_3), sizeof(UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411));
+		intptr_t L_10;
+		L_10 = XRTextureDescriptor_get_nativeTexture_m1E27C0E1DC11DDC6139178509EE91B8DF54DBAD4_inline((&___0_descriptor), NULL);
+		(&V_3)->___nativePtr = L_10;
+		UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 L_11 = V_3;
+		(&V_0)->___depth = L_11;
+		goto IL_00d6;
+	}
+
+IL_00a5:
+	{
+		int32_t L_12;
+		L_12 = XRTextureDescriptor_get_format_mA745AA87046D4FE4846C11B8285B980FF6DDDD1A_inline((&___0_descriptor), NULL);
+		int32_t L_13;
+		L_13 = UpdatableRenderTexture_ToUnityXRRenderTextureFormat_mF42C697942D423B9D9A115A6F1509502895C3CB0(L_12, NULL);
+		(&V_0)->___colorFormat = L_13;
+		il2cpp_codegen_initobj((&V_3), sizeof(UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411));
+		intptr_t L_14;
+		L_14 = XRTextureDescriptor_get_nativeTexture_m1E27C0E1DC11DDC6139178509EE91B8DF54DBAD4_inline((&___0_descriptor), NULL);
+		(&V_3)->___nativePtr = L_14;
+		UnityXRTextureData_t0B6BEAE3B6786B7D2F2ACA67AC0A9D686F737411 L_15 = V_3;
+		(&V_0)->___color = L_15;
+	}
+
+IL_00d6:
+	{
+		UnityXRRenderTextureDesc_tA6CF93382D5D69117464D7D409B5C0177B367267 L_16 = V_0;
+		return L_16;
+	}
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UpdatableRenderTexture_ToUnityXRDepthTextureFormat_m7FB86A71F68BE966F6A5AE8993B74191106DD1EA (int32_t ___0_textureFormat, const RuntimeMethod* method) 
+{
+	{
+		int32_t L_0 = ___0_textureFormat;
+		if ((((int32_t)L_0) == ((int32_t)((int32_t)9))))
+		{
+			goto IL_0011;
+		}
+	}
+	{
+		int32_t L_1 = ___0_textureFormat;
+		if ((((int32_t)L_1) == ((int32_t)((int32_t)15))))
+		{
+			goto IL_0011;
+		}
+	}
+	{
+		int32_t L_2 = ___0_textureFormat;
+		if ((!(((uint32_t)L_2) == ((uint32_t)((int32_t)18)))))
+		{
+			goto IL_0013;
+		}
+	}
+	{
+		return (int32_t)(0);
+	}
+
+IL_0011:
+	{
+		return (int32_t)(1);
+	}
+
+IL_0013:
+	{
+		int32_t L_3 = ___0_textureFormat;
+		int32_t L_4 = L_3;
+		RuntimeObject* L_5 = Box(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&TextureFormat_t87A73E4A3850D3410DC211676FC14B94226C1C1D_il2cpp_TypeInfo_var)), &L_4);
+		String_t* L_6;
+		L_6 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral1DA18FB1BF5C06826DF31AE85A772E59B46AE39C)), L_5, NULL);
+		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_7 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
+		NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B(L_7, L_6, NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_7, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&UpdatableRenderTexture_ToUnityXRDepthTextureFormat_m7FB86A71F68BE966F6A5AE8993B74191106DD1EA_RuntimeMethod_var)));
+	}
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UpdatableRenderTexture_ToUnityXRRenderTextureFormat_mF42C697942D423B9D9A115A6F1509502895C3CB0 (int32_t ___0_textureFormat, const RuntimeMethod* method) 
+{
+	{
+		int32_t L_0 = ___0_textureFormat;
+		if ((((int32_t)L_0) > ((int32_t)7)))
+		{
+			goto IL_000e;
+		}
+	}
+	{
+		int32_t L_1 = ___0_textureFormat;
+		if ((((int32_t)L_1) == ((int32_t)4)))
+		{
+			goto IL_001a;
+		}
+	}
+	{
+		int32_t L_2 = ___0_textureFormat;
+		if ((((int32_t)L_2) == ((int32_t)7)))
+		{
+			goto IL_001e;
+		}
+	}
+	{
+		goto IL_0022;
+	}
+
+IL_000e:
+	{
+		int32_t L_3 = ___0_textureFormat;
+		if ((((int32_t)L_3) == ((int32_t)((int32_t)14))))
+		{
+			goto IL_001c;
+		}
+	}
+	{
+		int32_t L_4 = ___0_textureFormat;
+		if ((((int32_t)L_4) == ((int32_t)((int32_t)17))))
+		{
+			goto IL_0020;
+		}
+	}
+	{
+		goto IL_0022;
+	}
+
+IL_001a:
+	{
+		return (int32_t)(0);
+	}
+
+IL_001c:
+	{
+		return (int32_t)(1);
+	}
+
+IL_001e:
+	{
+		return (int32_t)(2);
+	}
+
+IL_0020:
+	{
+		return (int32_t)(3);
+	}
+
+IL_0022:
+	{
+		int32_t L_5 = ___0_textureFormat;
+		int32_t L_6 = L_5;
+		RuntimeObject* L_7 = Box(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&TextureFormat_t87A73E4A3850D3410DC211676FC14B94226C1C1D_il2cpp_TypeInfo_var)), &L_6);
+		String_t* L_8;
+		L_8 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(((String_t*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&_stringLiteral4D4F7100A6B2DF8C430B9D46941640112B019240)), L_7, NULL);
+		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_9 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
+		NotSupportedException__ctor_mE174750CF0247BBB47544FFD71D66BB89630945B(L_9, L_8, NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_9, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&UpdatableRenderTexture_ToUnityXRRenderTextureFormat_mF42C697942D423B9D9A115A6F1509502895C3CB0_RuntimeMethod_var)));
 	}
 }
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UpdatableRenderTexture_DestroyTexture_m69F29C795B8BD67AB5610DB4FD78CCB72E805ECC (UpdatableRenderTexture_t3436B3F22BFC3C7A6DBF50429E1C99C52C16D757* __this, const RuntimeMethod* method) 
@@ -3033,6 +3330,20 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_p
 		return L_0;
 	}
 }
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_height_mC0B37241C24FA883E2594B9411080EDF654E3E01_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) 
+{
+	{
+		int32_t L_0 = __this->___m_Height;
+		return L_0;
+	}
+}
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_depth_m5885EBF7D767C918B1483D63D1B11EE60D939E7D_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) 
+{
+	{
+		int32_t L_0 = __this->___m_Depth;
+		return L_0;
+	}
+}
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool IntPtr_op_Equality_m7D9CDCDE9DC2A0C2C614633F4921E90187FAB271_inline (intptr_t ___0_value1, intptr_t ___1_value2, const RuntimeMethod* method) 
 {
 	{
@@ -3080,20 +3391,6 @@ IL_002c:
 		RuntimeObject* L_7;
 		L_7 = GCHandle_GetTarget_mE0AF851834410E2AEA6285B2497751570236C794(L_6, NULL);
 		return L_7;
-	}
-}
-IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_height_mC0B37241C24FA883E2594B9411080EDF654E3E01_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) 
-{
-	{
-		int32_t L_0 = __this->___m_Height;
-		return L_0;
-	}
-}
-IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t XRTextureDescriptor_get_depth_m5885EBF7D767C918B1483D63D1B11EE60D939E7D_inline (XRTextureDescriptor_t699023EDE6E2593F61CE969A68B5E56CD04CFA19* __this, const RuntimeMethod* method) 
-{
-	{
-		int32_t L_0 = __this->___m_Depth;
-		return L_0;
 	}
 }
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Ray_get_origin_m97604A8F180316A410DCD77B7D74D04522FA1BA6_inline (Ray_t2B1742D7958DC05BDC3EFC7461D3593E1430DC00* __this, const RuntimeMethod* method) 
