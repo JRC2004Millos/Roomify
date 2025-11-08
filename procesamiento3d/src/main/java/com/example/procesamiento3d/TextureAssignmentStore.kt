@@ -30,16 +30,26 @@ object TextureAssignmentStore {
     private fun canonical(label: String): String =
         label.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
 
+    private fun unifySynonyms(base: String): String {
+        // base debe venir ya sin paréntesis y en minúsculas
+        return when (base) {
+            "piso", "floor"   -> "floor"
+            "techo", "ceiling"-> "ceiling"
+            else              -> base
+        }
+    }
+
     private fun keyFor(label: String): String {
-        var s = Normalizer.normalize(label, Normalizer.Form.NFD)
+        var s = Normalizer.normalize(canonical(label), Normalizer.Form.NFD)
             .replace("\\p{M}+".toRegex(), "")
             .lowercase(Locale.ROOT)
             .trim()
         s = s.replace("\\s+".toRegex(), " ")
+        s = unifySynonyms(s)
         return s
     }
 
-    private fun baseKey(label: String): String = keyFor(canonical(label))
+    private fun baseKey(label: String): String = keyFor(label) // ya unifica
 
     // ===== Modelo en memoria =====
     private data class Assignment(
@@ -147,8 +157,6 @@ object TextureAssignmentStore {
             Log.e("TextureStore", "saveJson error: ${e.message}")
         }
     }
-
-    // ===== Helpers de conveniencia (opcional según tu convención de carpetas) =====
 
     /**
      * Si sigues la convención /Android/data/<pkg>/files/packs/<pack>,

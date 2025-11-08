@@ -44,6 +44,20 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import com.unity3d.player.UnityPlayerActivity
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.transformable
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.TransformableState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 class CaptureActivity : ComponentActivity() {
 
@@ -54,97 +68,8 @@ class CaptureActivity : ComponentActivity() {
         System.loadLibrary("opencv_java4")
 
         setContent {
-            var selectedWall by remember { mutableStateOf<String?>(null) }
-            val context = LocalContext.current
-            var pendingTargetWall by remember { mutableStateOf<String?>(null) }
-            var refreshKey by remember { mutableStateOf(0) }
-
-            // === 1) PREVIEW launcher ===
-            val previewLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                when (result.resultCode) {
-                    Activity.RESULT_OK -> {
-                        // Confirmó textura → volver a la lista
-                        selectedWall = null
-                        refreshKey++
-                    }
-                    Activity.RESULT_FIRST_USER -> {
-                        // Repetir toma
-                        if (result.data?.getBooleanExtra("repeat", false) == true) {
-                            val wall = result.data?.getStringExtra("wallName")
-                            if (!wall.isNullOrBlank()) selectedWall = wall
-                        }
-                    }
-                }
-            }
-
-            // === 2) PREVIEW lambda ===
-            val openPreview: (String?, String?, String, String?, String?) -> Unit =
-                { texturePath, processedPath, wallName, packName, packPath ->
-                    val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                        putExtra("texturePath", texturePath)
-                        putExtra("processedPath", processedPath)
-                        putExtra("wallName", wallName)
-                        if (!packName.isNullOrBlank()) putExtra("packName", packName)
-                        if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)
-                    }
-                    previewLauncher.launch(intent)
-                }
-
-            val chooserLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.StartActivityForResult()
-            ) { result ->
-                when (result.resultCode) {
-                    Activity.RESULT_OK -> {
-                        val albedo = result.data?.getStringExtra("albedoPath")
-                        val processed = result.data?.getStringExtra("processedPath")
-                        val sourceWall = result.data?.getStringExtra("sourceWall") ?: "Textura"
-                        val packName = result.data?.getStringExtra("packName")   // 👈 nuevo
-                        val packPath = result.data?.getStringExtra("packPath")   // 👈 nuevo
-
-                        val applyTo = pendingTargetWall ?: sourceWall
-
-                        if (albedo != null) {
-                            val intent = Intent(context, PreviewTextureActivity::class.java).apply {
-                                putExtra("texturePath", albedo)
-                                putExtra("processedPath", processed)
-                                putExtra("wallName", sourceWall)
-                                putExtra("applyToWall", applyTo)
-                                if (!packName.isNullOrBlank()) putExtra("packName", packName)   // 👈
-                                if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)   // 👈
-                            }
-                            previewLauncher.launch(intent)
-                        }
-                    }
-                    Activity.RESULT_FIRST_USER -> {
-                        val wall = result.data?.getStringExtra("targetWall")
-                        if (!wall.isNullOrBlank()) selectedWall = wall
-                    }
-                }
-            }
-
-            val openChooser: (String) -> Unit = { targetWall ->
-                pendingTargetWall = targetWall
-                val intent = Intent(context, TextureChooserActivity::class.java).apply {
-                    putExtra("targetWall", targetWall)
-                }
-                chooserLauncher.launch(intent)
-            }
-
-            // === 5) UI principal ===
-            if (selectedWall == null) {
-                WallListScreen(
-                    onWallSelected = { wallName -> selectedWall = wallName },
-                    openPreview = openPreview,
-                    openChooser = openChooser,
-                    refreshKey = refreshKey              // 👈 pásalo a la lista
-                )
-            } else {
-                CameraTextureCapture(
-                    wallName = selectedWall!!,
-                    openPreview = openPreview
-                )
+            com.example.roomify.ui.theme.RoomifyTheme {
+                CaptureScreen()
             }
         }
     }
@@ -157,41 +82,23 @@ class CaptureActivity : ComponentActivity() {
         refreshKey: Int
     ) {
         val context = LocalContext.current
-
-        var walls by remember {
-            mutableStateOf(
-                com.example.procesamiento3d.RoomDataLoader.loadWalls(
-                    context
-                )
-            )
-        }
-
-        // Observa cambios del JSON en runtime
-        DisposableEffect(Unit) {
-            val observer = com.example.procesamiento3d.RoomJsonObserver(context) {
-                walls = runCatching {
-                    com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(context)
-                }
-                    .getOrElse { emptyList() }
-            }
-            observer.startWatching()
-            onDispose { observer.stopWatching() }
-        }
-
         LaunchedEffect(refreshKey) {
             TextureAssignmentStore.loadJson(context)
         }
 
-        // === Estado de completitud (recalcula cuando cambian walls o refreshKey) ===
-        val completeness by remember(walls, refreshKey) {
+        var walls by remember {
             mutableStateOf(
-                validateCompleteness(
-                    context,
-                    walls,
-                    requireFloor = true,
-                    requireCeiling = false
-                )
+                com.example.procesamiento3d.RoomDataLoader.loadWalls(context)
             )
+        }
+
+        // recargar walls cuando cambie refreshKey
+        LaunchedEffect(refreshKey) {
+            walls = runCatching {
+                com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(context)
+            }.getOrElse {
+                com.example.procesamiento3d.RoomDataLoader.loadWalls(context)
+            }
         }
 
         Box(Modifier.fillMaxSize()) {
@@ -206,157 +113,245 @@ class CaptureActivity : ComponentActivity() {
                     Text("No hay paredes aún. Ejecuta la medición en Unity para generar room_data.json.")
                 }
             } else {
-                LazyColumn(
+
+                // Estado para alternar vista
+                var useMap by remember { mutableStateOf(true) }
+
+                Row(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 88.dp) // deja espacio para el footer
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    items(walls) { wall: com.example.procesamiento3d.WallInfo ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
-                                .clickable {
-                                    TextureAssignmentStore.loadJson(context)
+                    Text(if (useMap) "Mapa 2D" else "Lista", modifier = Modifier.weight(1f))
+                    Switch(checked = useMap, onCheckedChange = { useMap = it })
+                }
 
-                                    fun canonical(name: String) =
-                                        name.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
+                if (useMap) {
+                    fun handleTapForLabel(targetLabel: String) {
+                        TextureAssignmentStore.loadJson(context)
 
-                                    val safe = wall.label.replace(" ", "_")
-                                    val thisAlbedo = File(context.cacheDir, "${safe}_Albedo.png")
+                        fun canonical(name: String) =
+                            name.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
 
-                                    // 1) si ya hay textura cacheada → preview directo
-                                    if (thisAlbedo.exists()) {
-                                        openPreview(
-                                            thisAlbedo.absolutePath,
-                                            File(
-                                                context.cacheDir,
-                                                "${safe}_Processed.jpg"
-                                            ).absolutePath,
-                                            wall.label, null, null
-                                        )
-                                        return@clickable
-                                    }
+                        val safe = targetLabel.replace(" ", "_")
+                        val thisAlbedo = File(context.cacheDir, "${safe}_Albedo.png")
 
-                                    // 2) si el JSON dice que esta pared (o equivalente) ya tiene pack, intenta reconstruir preview
-                                    val allWalls = runCatching {
-                                        com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(
-                                            context
-                                        )
-                                    }.getOrElse {
-                                        com.example.procesamiento3d.RoomDataLoader.loadWalls(context)
-                                    }
-                                    val baseCanon = canonical(wall.label)
-                                    val packForThis = TextureAssignmentStore.getPack(wall.label)
-                                        ?: allWalls.firstOrNull { canonical(it.label) == baseCanon }
-                                            ?.let { TextureAssignmentStore.getPack(it.label) }
+                        // 1) si ya hay textura cacheada → preview directo
+                        if (thisAlbedo.exists()) {
+                            openPreview(
+                                thisAlbedo.absolutePath,
+                                File(context.cacheDir, "${safe}_Processed.jpg").absolutePath,
+                                targetLabel, null, null
+                            )
+                            return
+                        }
 
-                                    if (packForThis != null) {
-                                        val candidate = (context.cacheDir.listFiles { f ->
-                                            f.isFile && f.name.endsWith("_Albedo.png")
-                                        } ?: emptyArray()).firstOrNull { f ->
-                                            val srcWall =
-                                                f.name.removeSuffix("_Albedo.png").replace("_", " ")
-                                            TextureAssignmentStore.getPack(srcWall) == packForThis
+                        // 2) intentar reutilizar pack de otra pared con el mismo canonical
+                        val allWalls = runCatching {
+                            com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(context)
+                        }.getOrElse {
+                            com.example.procesamiento3d.RoomDataLoader.loadWalls(context)
+                        }
+                        val baseCanon = canonical(targetLabel)
+                        val packForThis = TextureAssignmentStore.getPack(targetLabel)
+                            ?: allWalls.firstOrNull { canonical(it.label) == baseCanon }
+                                ?.let { TextureAssignmentStore.getPack(it.label) }
+
+                        if (packForThis != null) {
+                            val candidate = (context.cacheDir.listFiles { f ->
+                                f.isFile && f.name.endsWith("_Albedo.png")
+                            } ?: emptyArray()).firstOrNull { f ->
+                                val srcWall = f.name.removeSuffix("_Albedo.png").replace("_", " ")
+                                TextureAssignmentStore.getPack(srcWall) == packForThis
+                            }
+                            if (candidate != null) {
+                                try {
+                                    candidate.copyTo(thisAlbedo, overwrite = true)
+                                    val srcProcessed = File(
+                                        context.cacheDir,
+                                        "${candidate.name.removeSuffix("_Albedo.png")}_Processed.jpg"
+                                    )
+                                    val thisProcessed = File(context.cacheDir, "${safe}_Processed.jpg")
+                                    if (srcProcessed.exists()) srcProcessed.copyTo(thisProcessed, overwrite = true)
+
+                                    val reusedPackName = packForThis
+                                    val reusedPackPath = File(context.filesDir, "pbrpacks/$reusedPackName").absolutePath
+
+                                    openPreview(
+                                        thisAlbedo.absolutePath,
+                                        thisProcessed.takeIf { it.exists() }?.absolutePath,
+                                        canonicalSurface(targetLabel),
+                                        reusedPackName,
+                                        reusedPackPath
+                                    )
+
+                                    return
+                                } catch (_: Exception) { /* fallback */ }
+                            }
+                        }
+
+                        // 3) fallback: chooser si hay alguna textura previa, si no cámara
+                        val hasAnyTexture = (context.cacheDir.listFiles { f ->
+                            f.isFile && f.name.endsWith("_Albedo.png")
+                        } ?: emptyArray()).isNotEmpty()
+
+                        if (hasAnyTexture) openChooser(targetLabel) else onWallSelected(targetLabel)
+                    }
+                    RoomMap2D(
+                        walls = walls,
+                        isAssigned = { w -> TextureAssignmentStore.getPack(canonicalSurface(w.label)) != null },
+                        onWallTapped = { wall -> handleTapForLabel(wall.label) },
+                        onFloorTapped = { handleTapForLabel("Floor") },
+                        onCeilingTapped = { handleTapForLabel("Ceiling") },
+                        refreshKey = refreshKey
+                    )
+                } else {
+                    // ===== Lista (única, sin duplicados) =====
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 88.dp) // deja espacio para el footer
+                    ) {
+                        items(walls) { wall: com.example.procesamiento3d.WallInfo ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .clickable {
+                                        TextureAssignmentStore.loadJson(context)
+
+                                        fun canonical(name: String) =
+                                            name.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
+
+                                        val safe = wall.label.replace(" ", "_")
+                                        val thisAlbedo =
+                                            File(context.cacheDir, "${safe}_Albedo.png")
+
+                                        // 1) si ya hay textura cacheada → preview directo
+                                        if (thisAlbedo.exists()) {
+                                            openPreview(
+                                                thisAlbedo.absolutePath,
+                                                File(
+                                                    context.cacheDir,
+                                                    "${safe}_Processed.jpg"
+                                                ).absolutePath,
+                                                wall.label, null, null
+                                            )
+                                            return@clickable
                                         }
 
-                                        if (candidate != null) {
-                                            try {
-                                                candidate.copyTo(thisAlbedo, overwrite = true)
-                                                val srcProcessed = File(
-                                                    context.cacheDir,
-                                                    "${candidate.name.removeSuffix("_Albedo.png")}_Processed.jpg"
-                                                )
-                                                val thisProcessed =
-                                                    File(context.cacheDir, "${safe}_Processed.jpg")
-                                                if (srcProcessed.exists()) srcProcessed.copyTo(
-                                                    thisProcessed,
-                                                    overwrite = true
-                                                )
+                                        // 2) intentar reutilizar pack de otra pared
+                                        val allWalls = runCatching {
+                                            com.example.procesamiento3d.RoomDataLoader.loadWallsRuntime(
+                                                context
+                                            )
+                                        }.getOrElse {
+                                            com.example.procesamiento3d.RoomDataLoader.loadWalls(
+                                                context
+                                            )
+                                        }
+                                        val baseCanon = canonical(wall.label)
+                                        val packForThis = TextureAssignmentStore.getPack(wall.label)
+                                            ?: allWalls.firstOrNull { canonical(it.label) == baseCanon }
+                                                ?.let { TextureAssignmentStore.getPack(it.label) }
 
-                                                openPreview(
-                                                    thisAlbedo.absolutePath,
-                                                    thisProcessed.takeIf { it.exists() }?.absolutePath,
-                                                    wall.label, null, null
-                                                )
-                                                return@clickable
-                                            } catch (_: Exception) { /* fallback a chooser/cámara */
+                                        if (packForThis != null) {
+                                            val candidate = (context.cacheDir.listFiles { f ->
+                                                f.isFile && f.name.endsWith("_Albedo.png")
+                                            } ?: emptyArray()).firstOrNull { f ->
+                                                val srcWall =
+                                                    f.name.removeSuffix("_Albedo.png")
+                                                        .replace("_", " ")
+                                                TextureAssignmentStore.getPack(srcWall) == packForThis
+                                            }
+                                            if (candidate != null) {
+                                                try {
+                                                    candidate.copyTo(thisAlbedo, overwrite = true)
+                                                    val srcProcessed = File(
+                                                        context.cacheDir,
+                                                        "${candidate.name.removeSuffix("_Albedo.png")}_Processed.jpg"
+                                                    )
+                                                    val thisProcessed =
+                                                        File(
+                                                            context.cacheDir,
+                                                            "${safe}_Processed.jpg"
+                                                        )
+                                                    if (srcProcessed.exists())
+                                                        srcProcessed.copyTo(
+                                                            thisProcessed,
+                                                            overwrite = true
+                                                        )
+
+                                                    openPreview(
+                                                        thisAlbedo.absolutePath,
+                                                        thisProcessed.takeIf { it.exists() }?.absolutePath,
+                                                        wall.label, null, null
+                                                    )
+                                                    return@clickable
+                                                } catch (_: Exception) {
+                                                    // fallback a chooser/cámara
+                                                }
                                             }
                                         }
+
+                                        // 3) fallback: chooser si hay alguna textura previa, si no cámara
+                                        val hasAnyTexture = (context.cacheDir.listFiles { f ->
+                                            f.isFile && f.name.endsWith("_Albedo.png")
+                                        } ?: emptyArray()).isNotEmpty()
+
+                                        if (hasAnyTexture) openChooser(wall.label) else onWallSelected(
+                                            wall.label
+                                        )
                                     }
-
-                                    // 3) fallback: chooser si hay alguna textura previa, si no cámara
-                                    val hasAnyTexture = (context.cacheDir.listFiles { f ->
-                                        f.isFile && f.name.endsWith("_Albedo.png")
-                                    } ?: emptyArray()).isNotEmpty()
-
-                                    if (hasAnyTexture) openChooser(wall.label) else onWallSelected(
-                                        wall.label
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text(wall.label, style = MaterialTheme.typography.titleMedium)
+                                        val pack = TextureAssignmentStore.getPack(wall.label)
+                                        Text(
+                                            text = pack ?: "Sin textura asignada",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = if (pack != null)
+                                                MaterialTheme.colorScheme.primary
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    val assigned = TextureAssignmentStore.getPack(wall.label) != null
+                                    Icon(
+                                        imageVector = if (assigned) Icons.Default.Check else Icons.Default.PhotoCamera,
+                                        contentDescription = null
                                     )
                                 }
-                        ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(
-                                    text = wall.label,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                Spacer(Modifier.height(6.dp))
-
-                                fun canonical(n: String) =
-                                    n.replace(Regex("\\s*\\([^)]*\\)\\s*$"), "").trim()
-
-                                val safe = wall.label.replace(" ", "_")
-                                val hasFile = File(context.cacheDir, "${safe}_Albedo.png").exists()
-                                val packDirect = TextureAssignmentStore.getPack(wall.label)
-                                val packCanonical =
-                                    walls.firstOrNull { canonical(it.label) == canonical(wall.label) }
-                                        ?.let { TextureAssignmentStore.getPack(it.label) }
-                                val hasAssigned = (packDirect != null || packCanonical != null)
-                                val hasThis = hasFile || hasAssigned
-
-                                Text(
-                                    text = if (hasThis) "Textura capturada" else "Sin textura",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (hasThis) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                         }
                     }
                 }
-            }
 
-            // === FOOTER: resumen y botón Ver en 3D ===
-            Surface(
-                shadowElevation = 8.dp,
-                tonalElevation = 4.dp,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                // ===== Footer con botón "Ver en 3D" =====
+                Surface(
+                    tonalElevation = 3.dp,
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    /*val assignedCount = expectedSurfaceKeys(walls).size - completeness.missing.size
-                    Text(
-                        text = if (completeness.isComplete)
-                            "Listo para ver en 3D"
-                        else
-                            "Asignadas $assignedCount / ${expectedSurfaceKeys(walls).size}",
-                        modifier = Modifier.weight(1f)
-                    )*/
-                    val ctx = LocalContext.current
-                    Button(
-                        onClick = { openUnityPreviewNow(ctx) }, // 👈 ahora coincide con la firma de abajo
-                        //enabled = completeness.isComplete
-                    ) { Text("Ver en 3D") }
+                    val ctx = context
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Button(
+                            onClick = { openUnityPreviewNow(ctx) },
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Ver en 3D") }
+                    }
                 }
             }
+            }
         }
-    }
 
     private fun labelToKey(label: String): String {
         val l = label.trim().lowercase()
@@ -378,13 +373,13 @@ class CaptureActivity : ComponentActivity() {
         val s = mutableSetOf<String>()
         // Muros
         for (w in walls) {
-            if (TextureAssignmentStore.getPack(w.label) != null) {
+            if (TextureAssignmentStore.getPack(canonicalSurface(w.label)) != null) {
                 s += labelToKey(w.label)
             }
         }
-        // Piso / Techo si los manejas
-        if (TextureAssignmentStore.getPack("Floor") != null) s += "FLOOR"
-        if (TextureAssignmentStore.getPack("Ceiling") != null) s += "CEILING"
+        // Piso / Techo
+        if (isSurfaceAssignedAny("Floor"))   s += "FLOOR"
+        if (isSurfaceAssignedAny("Ceiling")) s += "CEILING"
         return s
     }
 
@@ -573,8 +568,27 @@ class CaptureActivity : ComponentActivity() {
             val intent = Intent(ctx, UnityPlayerActivity::class.java).apply {
                 putExtra("SCENE_TO_LOAD", "RenderScene")
                 putExtra("PBR_PACKS_ROOT", packsRoot.absolutePath)
+                putExtra("TEXTURES_JSON_PATH", jsonFile.absolutePath)   // 👈 FALTA ESTO
                 putExtra("INTENT_TOKEN", token)
             }
+
+            if (jsonFile.exists() && jsonFile.length() > 0L) {
+                try {
+                    val root = org.json.JSONObject(jsonFile.readText())
+                    val items = root.getJSONArray("items")
+                    for (i in 0 until items.length()) {
+                        val it = items.getJSONObject(i)
+                        when (it.optString("wall")) {
+                            "Floor"   -> it.put("wall", "Piso")
+                            "Ceiling" -> it.put("wall", "Techo")
+                        }
+                    }
+                    jsonFile.writeText(root.toString(2)) // re-escribe bonito
+                } catch (_: Exception) {
+                    // Si algo falla, dejamos el JSON original (en inglés) para no bloquear el flujo
+                }
+            }
+
 
             Log.d("CaptureActivity", "🎮 Lanzando Unity con RenderScene")
             ctx.startActivity(intent)
@@ -584,4 +598,433 @@ class CaptureActivity : ComponentActivity() {
             Toast.makeText(ctx, "Error al abrir Unity: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun RoomMap2D(
+        walls: List<com.example.procesamiento3d.WallInfo>,
+        isAssigned: (com.example.procesamiento3d.WallInfo) -> Boolean,
+        onWallTapped: (com.example.procesamiento3d.WallInfo) -> Unit,
+        onFloorTapped: () -> Unit,
+        onCeilingTapped: () -> Unit,
+        refreshKey: Int
+    ) {
+        val edges = remember(walls, refreshKey) {
+            walls.mapNotNull { w -> parseLettersFromLabel(w.label)?.let { (a, b) -> Triple(a, b, w) } }
+        }
+        val nodes = remember(edges, refreshKey) { edges.flatMap { listOf(it.first, it.second) }.distinct() }
+        val nodePositions = remember(nodes, refreshKey) { positionsOnCircle(nodes) }
+        val assignedNodes: Set<Char> = remember(edges, refreshKey) {
+            val s = mutableSetOf<Char>()
+            edges.forEach { (a, b, w) ->
+                if (isAssigned(w)) { s += a; s += b }
+            }
+            s
+        }
+
+        // Pan/zoom
+        var scale by remember { mutableStateOf(1f) }
+        var offset by remember { mutableStateOf(Offset.Zero) }
+        val transformState = remember {
+            TransformableState { z, p, _ -> scale = (scale * z).coerceIn(0.6f, 4f); offset += p }
+        }
+        var lastTap by remember { mutableStateOf<Offset?>(null) }
+
+        // Colores (fuera del Canvas)
+        val colorAssigned = Color(0xFF4CAF50)
+        val colorUnassigned = Color.White.copy(alpha = 0.5f)
+        val colorNode = Color.White
+        val bgVariant = MaterialTheme.colorScheme.surfaceVariant
+
+        // Piso/Techo asignados
+        val floorAssigned = isSurfaceAssignedAny("Floor")
+        val ceilAssigned  = isSurfaceAssignedAny("Ceiling")
+
+        // Insets UI y medidas
+        val density = LocalDensity.current
+        val topInsetPx = with(density) { (56.dp + 12.dp).toPx() }
+        val bottomInsetPx = with(density) { (64.dp + 12.dp).toPx() }
+        val r = with(density) { 12.dp.toPx() }
+        val pad = with(density) { 12.dp.toPx() }
+
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(bgVariant)
+                .pointerInput(Unit) { detectTapGestures { pos -> lastTap = pos } }
+                .transformable(transformState)
+        ) {
+            Canvas(Modifier.fillMaxSize()) {
+                val viewSize = size
+                val center = Offset(viewSize.width / 2f, viewSize.height / 2f)
+                val mapRotationDeg = -45f
+                val mapRotationRad = Math.toRadians(mapRotationDeg.toDouble()).toFloat()
+
+                val toView: (Offset) -> Offset = { pModel ->
+                    val pRot = rotate(pModel, mapRotationRad) // endereza el polígono
+                    center + (pRot * scale) + offset
+                }
+
+                val tap = lastTap
+                var tappedWall: com.example.procesamiento3d.WallInfo? = null
+
+                // ===== DIBUJAR MUROS =====
+                edges.forEach { (a, b, wall) ->
+                    val pa = toView(nodePositions.getValue(a))
+                    val pb = toView(nodePositions.getValue(b))
+                    val assigned = isAssigned(wall)
+
+                    // línea
+                    drawLine(
+                        color = if (assigned) colorAssigned else colorUnassigned,
+                        start = pa, end = pb, strokeWidth = 6f
+                    )
+
+                    // ===== etiqueta rotada según la pared =====
+                    val mid = Offset((pa.x + pb.x) / 2f, (pa.y + pb.y) / 2f)
+
+                    // ángulo del segmento (en grados)
+                    val angleRad = kotlin.math.atan2(pb.y - pa.y, pb.x - pa.x)
+                    var angleDeg = Math.toDegrees(angleRad.toDouble()).toFloat()
+
+                    // evita texto al revés: si apunta a la izquierda, gíralo 180°
+                    if (angleDeg > 90f || angleDeg < -90f) angleDeg -= 180f
+
+                    // pinta el texto con rotación y una banda semi-transparente para legibilidad
+                    val nc = drawContext.canvas.nativeCanvas
+                    val paint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.WHITE
+                        textSize = 24f
+                        isAntiAlias = true
+                    }
+                    val bgPaint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        alpha = 90 // ~35% opaco
+                        isAntiAlias = true
+                    }
+
+                    // medir texto
+                    val label = wall.label
+                    val textWidth = paint.measureText(label)
+                    val textHeight = paint.fontMetrics.run { bottom - top }
+
+                    // guardar estado, trasladar al medio y rotar
+                    nc.save()
+                    nc.translate(mid.x, mid.y)
+                    nc.rotate(angleDeg)
+
+                    val padH = 8f
+                    val padV = 6f
+                    nc.drawRoundRect(
+                        -textWidth / 2f - padH,
+                        -textHeight / 2f - padV,
+                        textWidth / 2f + padH,
+                        textHeight / 2f + padV,
+                        10f, 10f,
+                        bgPaint
+                    )
+                    nc.drawText(
+                        label,
+                        -textWidth / 2f,
+                        - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f,
+                        paint
+                    )
+                    nc.restore()
+
+                    if (tap != null && tappedWall == null) {
+                        val d = pointToSegmentDistance(tap, pa, pb)
+                        if (d <= 36f) tappedWall = wall
+                    }
+                }
+
+                nodePositions.forEach { (ch, p) ->
+                    val pv = toView(p)
+                    val nodeIsAssigned = assignedNodes.contains(ch)
+                    drawCircle(
+                        color = if (nodeIsAssigned) colorAssigned else colorNode,
+                        radius = 10f,
+                        center = pv
+                    )
+                    drawContext.canvas.nativeCanvas.drawText(
+                        ch.toString(), pv.x + 12f, pv.y - 12f,
+                        android.graphics.Paint().apply {
+                            color = android.graphics.Color.BLACK
+                            textSize = 30f; isAntiAlias = true
+                        }
+                    )
+                }
+
+                // ===== BOTÓN TECHO (fijo) =====
+                val ceilCenter = Offset(viewSize.width - pad - r, topInsetPx + pad + r)
+
+                run {
+                    val paint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.WHITE   // ⬅️ texto blanco
+                        textSize = 24f
+                        isAntiAlias = true
+                    }
+                    val bg = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        alpha = 110                            // banda ~43%
+                        isAntiAlias = true
+                    }
+                    val label = "Techo"
+                    val w = paint.measureText(label)
+                    val h = paint.fontMetrics.run { bottom - top }
+                    val px = ceilCenter.x - r - 8f - w        // ⬅️ a la izquierda del círculo
+                    val py = ceilCenter.y
+                    val nc = drawContext.canvas.nativeCanvas
+                    nc.save()
+                    nc.drawRoundRect(px - 6f, py - h/2f - 6f, px + w + 6f, py + h/2f + 6f, 10f, 10f, bg)
+                    nc.drawText(label, px, py - (paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f, paint)
+                    nc.restore()
+                }
+
+                val centroidModel = nodePositions.values.takeIf { it.isNotEmpty() }?.let { pts ->
+                    val sx = pts.sumOf { it.x.toDouble() }.toFloat()
+                    val sy = pts.sumOf { it.y.toDouble() }.toFloat()
+                    Offset(sx / pts.size, sy / pts.size)
+                }
+                val floorCenter = centroidModel?.let { toView(it) }
+                    ?: Offset(pad + r, viewSize.height - bottomInsetPx - pad - r)
+
+                drawCircle(color = if (ceilAssigned) colorAssigned else colorUnassigned, radius = r, center = ceilCenter)
+                drawCircle(color = if (floorAssigned) colorAssigned else colorUnassigned, radius = r, center = floorCenter)
+
+                run {
+                    val paint = android.graphics.Paint().apply {
+                        color = android.graphics.Color.WHITE   // ⬅️ texto blanco
+                        textSize = 24f
+                        isAntiAlias = true
+                    }
+                    val bg = android.graphics.Paint().apply {
+                        color = android.graphics.Color.BLACK
+                        alpha = 110
+                        isAntiAlias = true
+                    }
+                    val label = "Piso"
+                    val w = paint.measureText(label)
+                    val h = paint.fontMetrics.run { bottom - top }
+                    val px = floorCenter.x - w/2f             // debajo del círculo
+                    val py = floorCenter.y + r + 20f
+                    val nc = drawContext.canvas.nativeCanvas
+                    nc.save()
+                    nc.drawRoundRect(px - 6f, py - h - 6f, px + w + 6f, py + 6f, 10f, 10f, bg)
+                    nc.drawText(label, px, py - (paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f, paint)
+                    nc.restore()
+                }
+
+                // ===== HIT-TEST =====
+                fun hitCircle(p: Offset, c: Offset, rad: Float) =
+                    (p.x - c.x)*(p.x - c.x) + (p.y - c.y)*(p.y - c.y) <= (rad + 10f)*(rad + 10f)
+
+                if (tap != null) {
+                    lastTap = null
+                    when {
+                        hitCircle(tap, floorCenter, r) -> Handler(Looper.getMainLooper()).post { onFloorTapped() }
+                        hitCircle(tap, ceilCenter, r)  -> Handler(Looper.getMainLooper()).post { onCeilingTapped() }
+                        tappedWall != null             -> Handler(Looper.getMainLooper()).post { onWallTapped(tappedWall!!) }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun parseLettersFromLabel(label: String): Pair<Char, Char>? {
+        // Soporta: "Pared de A a B", "Muro A-B", "A -> B", etc.
+        val l = label.uppercase()
+        // Intenta “de X a Y”
+        Regex("""DE\s+([A-Z])\s+A\s+([A-Z])""").find(l)?.let {
+            return it.groupValues[1][0] to it.groupValues[2][0]
+        }
+        // Intenta “X - Y”
+        Regex("""\b([A-Z])\s*[-–>\u2192]\s*([A-Z])\b""").find(l)?.let {
+            return it.groupValues[1][0] to it.groupValues[2][0]
+        }
+        return null
+    }
+
+    private fun positionsOnCircle(nodes: List<Char>): Map<Char, Offset> {
+        if (nodes.isEmpty()) return emptyMap()
+        val n = nodes.size
+        val r = 500f
+        val startAngle = -90.0
+        return nodes.mapIndexed { i, ch ->
+            val ang = Math.toRadians(startAngle + i * (360.0 / n))
+            val x = (r * Math.cos(ang)).toFloat()
+            val y = (r * Math.sin(ang)).toFloat()
+            ch to Offset(x, y)
+        }.toMap()
+    }
+
+    private fun pointToSegmentDistance(p: Offset, a: Offset, b: Offset): Float {
+        val ax = a.x; val ay = a.y
+        val bx = b.x; val by = b.y
+        val px = p.x; val py = p.y
+
+        val abx = bx - ax; val aby = by - ay
+        val apx = px - ax; val apy = py - ay
+        val abLen2 = abx * abx + aby * aby
+        val t = if (abLen2 == 0f) 0f else ((apx * abx + apy * aby) / abLen2).coerceIn(0f, 1f)
+        val cx = ax + t * abx; val cy = ay + t * aby
+        val dx = px - cx; val dy = py - cy
+        return kotlin.math.sqrt(dx * dx + dy * dy)
+    }
+
+    private fun rotate(p: Offset, angleRad: Float): Offset {
+        val c = kotlin.math.cos(angleRad)
+        val s = kotlin.math.sin(angleRad)
+        return Offset(p.x * c - p.y * s, p.x * s + p.y * c)
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun CaptureScreen() {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Texturas del espacio") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) { inner ->                       // <-- usa el padding del Scaffold
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(inner)
+                    .padding(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp,
+                shadowElevation = 8.dp
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+                    CaptureContent()
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun CaptureContent() {
+        var selectedWall by remember { mutableStateOf<String?>(null) }
+        val context = LocalContext.current
+        var pendingTargetWall by remember { mutableStateOf<String?>(null) }
+        var refreshKey by remember { mutableStateOf(0) }
+
+        // === PREVIEW launcher ===
+        val previewLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    selectedWall = null
+                    refreshKey++
+                }
+                Activity.RESULT_FIRST_USER -> {
+                    if (result.data?.getBooleanExtra("repeat", false) == true) {
+                        result.data?.getStringExtra("wallName")?.let { selectedWall = it }
+                    }
+                }
+            }
+        }
+
+        // === PREVIEW lambda ===
+        val openPreview: (String?, String?, String, String?, String?) -> Unit =
+            { texturePath, processedPath, wallName, packName, packPath ->
+                val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                    putExtra("texturePath", texturePath)
+                    putExtra("processedPath", processedPath)
+                    putExtra("wallName", wallName)
+                    putExtra("applyToWall", canonicalSurface(wallName))
+                    if (!packName.isNullOrBlank()) putExtra("packName", packName)
+                    if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)
+                }
+                previewLauncher.launch(intent)
+            }
+
+        // === CHOOSER launcher ===
+        val chooserLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            when (result.resultCode) {
+                Activity.RESULT_OK -> {
+                    val albedo = result.data?.getStringExtra("albedoPath")
+                    val processed = result.data?.getStringExtra("processedPath")
+                    val sourceWall = result.data?.getStringExtra("sourceWall") ?: "Textura"
+                    val packName = result.data?.getStringExtra("packName")
+                    val packPath = result.data?.getStringExtra("packPath")
+                    val applyTo = canonicalSurface(pendingTargetWall ?: sourceWall)
+
+                    if (albedo != null) {
+                        val intent = Intent(context, PreviewTextureActivity::class.java).apply {
+                            putExtra("texturePath", albedo)
+                            putExtra("processedPath", processed)
+                            putExtra("wallName", sourceWall)
+                            putExtra("applyToWall", applyTo)
+                            if (!packName.isNullOrBlank()) putExtra("packName", packName)
+                            if (!packPath.isNullOrBlank()) putExtra("packPath", packPath)
+                        }
+                        previewLauncher.launch(intent)
+                    }
+                }
+                Activity.RESULT_FIRST_USER -> {
+                    result.data?.getStringExtra("targetWall")?.let { selectedWall = it }
+                }
+            }
+        }
+
+        val openChooser: (String) -> Unit = { targetWall ->
+            pendingTargetWall = targetWall
+            val intent = Intent(context, TextureChooserActivity::class.java).apply {
+                putExtra("targetWall", targetWall)
+            }
+            chooserLauncher.launch(intent)
+        }
+
+        // === UI principal ===
+        if (selectedWall == null) {
+            WallListScreen(
+                onWallSelected = { wallName -> selectedWall = wallName },
+                openPreview = openPreview,
+                openChooser = openChooser,
+                refreshKey = refreshKey
+            )
+        } else {
+            CameraTextureCapture(
+                wallName = selectedWall!!,
+                openPreview = openPreview
+            )
+        }
+        }
+
+    private fun canonicalSurface(label: String): String {
+        val l = label.trim().lowercase()
+        return when (l) {
+            "piso", "floor"   -> "Floor"
+            "techo", "ceiling"-> "Ceiling"
+            else              -> label  // deja paredes tal cual ("Pared de A a B ...")
+        }
+    }
+
+    private fun isSurfaceAssignedAny(name: String): Boolean {
+        val canon = canonicalSurface(name) // "Floor" | "Ceiling" | etiqueta de pared
+        val aliases = when (canon) {
+            "Floor"   -> listOf("Floor", "FLOOR", "floor", "Piso", "piso")
+            "Ceiling" -> listOf("Ceiling", "CEILING", "ceiling", "Techo", "techo")
+            else      -> listOf(canon)
+        }
+        return aliases.any { TextureAssignmentStore.getPack(it) != null }
+    }
+
 }
