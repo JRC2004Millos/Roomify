@@ -442,7 +442,7 @@ class CaptureActivity : ComponentActivity() {
             val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
 
             LaunchedEffect(true) {
-                kotlinx.coroutines.delay(750) // espera ~0.7s para que Unity libere la cámara
+                kotlinx.coroutines.delay(750)
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
                     it.setSurfaceProvider(previewView.surfaceProvider)
@@ -458,7 +458,6 @@ class CaptureActivity : ComponentActivity() {
             Box(modifier = Modifier.fillMaxSize()) {
                 AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
-                // Marco guía
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val rectWidth = size.width * 0.6f
                     val rectHeight = size.height * 0.4f
@@ -613,7 +612,19 @@ class CaptureActivity : ComponentActivity() {
             walls.mapNotNull { w -> parseLettersFromLabel(w.label)?.let { (a, b) -> Triple(a, b, w) } }
         }
         val nodes = remember(edges, refreshKey) { edges.flatMap { listOf(it.first, it.second) }.distinct() }
-        val nodePositions = remember(nodes, refreshKey) { positionsOnCircle(nodes) }
+        val context = LocalContext.current
+        val measuredPositions = remember(refreshKey) { loadMeasuredNodePositions(context) }
+
+        val nodePositions = remember(nodes, measuredPositions, refreshKey) {
+            val fromMeasured = measuredPositions?.filterKeys { it in nodes } ?: emptyMap()
+            if (fromMeasured.size == nodes.size) {
+                fromMeasured
+            } else {
+                val fallback = positionsOnCircle(nodes)
+                nodes.associateWith { ch -> fromMeasured[ch] ?: fallback.getValue(ch) }
+            }
+        }
+
         val assignedNodes: Set<Char> = remember(edges, refreshKey) {
             val s = mutableSetOf<Char>()
             edges.forEach { (a, b, w) ->
@@ -644,8 +655,10 @@ class CaptureActivity : ComponentActivity() {
         val density = LocalDensity.current
         val topInsetPx = with(density) { (56.dp + 12.dp).toPx() }
         val bottomInsetPx = with(density) { (64.dp + 12.dp).toPx() }
-        val r = with(density) { 12.dp.toPx() }
-        val pad = with(density) { 12.dp.toPx() }
+        val rNode  = with(density) { 6.dp.toPx() }   // ← nodos más pequeños
+        val rBadge = with(density) { 12.dp.toPx() }  // ← para Piso/Techo
+        val pad = with(density) { 24.dp.toPx() } // margen interno
+        val mapRotationDeg = 0f // prueba 0°; si luego quieres, cámbialo a -45f
 
         Box(
             Modifier
@@ -654,176 +667,149 @@ class CaptureActivity : ComponentActivity() {
                 .pointerInput(Unit) { detectTapGestures { pos -> lastTap = pos } }
                 .transformable(transformState)
         ) {
-            Canvas(Modifier.fillMaxSize()) {
-                val viewSize = size
-                val center = Offset(viewSize.width / 2f, viewSize.height / 2f)
-                val mapRotationDeg = -45f
-                val mapRotationRad = Math.toRadians(mapRotationDeg.toDouble()).toFloat()
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                // === mapeo [0..1] → pantalla (con padding y zoom/pan) ===
+                val availW = size.width  - 2*pad
+                val availH = size.height - 2*pad
+                val center = Offset(size.width/2f, size.height/2f)
 
-                val toView: (Offset) -> Offset = { pModel ->
-                    val pRot = rotate(pModel, mapRotationRad) // endereza el polígono
-                    center + (pRot * scale) + offset
+                fun toView(pModel: Offset): Offset {
+                    // pModel ∈ [0,1]
+                    val base = Offset(pad + pModel.x * availW, pad + pModel.y * availH)
+                    val rel  = base - center
+                    return center + rel * scale + offset
                 }
 
+                // Colores
+                val colorAssigned   = Color(0xFF4CAF50)
+                val colorUnassigned = Color.White.copy(alpha = 0.5f)
+                val colorNode       = Color.White
+
+                // --- Tap/hit ---
                 val tap = lastTap
                 var tappedWall: com.example.procesamiento3d.WallInfo? = null
 
-                // ===== DIBUJAR MUROS =====
+                // === 1) DIBUJAR MUROS + RÓTULOS Y DETECTAR TAP SOBRE MUROS ===
                 edges.forEach { (a, b, wall) ->
                     val pa = toView(nodePositions.getValue(a))
                     val pb = toView(nodePositions.getValue(b))
                     val assigned = isAssigned(wall)
 
-                    // línea
+                    // línea de la pared
                     drawLine(
                         color = if (assigned) colorAssigned else colorUnassigned,
                         start = pa, end = pb, strokeWidth = 6f
                     )
 
-                    // ===== etiqueta rotada según la pared =====
+                    // rótulo centrado y rotado
                     val mid = Offset((pa.x + pb.x) / 2f, (pa.y + pb.y) / 2f)
-
-                    // ángulo del segmento (en grados)
-                    val angleRad = kotlin.math.atan2(pb.y - pa.y, pb.x - pa.x)
-                    var angleDeg = Math.toDegrees(angleRad.toDouble()).toFloat()
-
-                    // evita texto al revés: si apunta a la izquierda, gíralo 180°
-                    if (angleDeg > 90f || angleDeg < -90f) angleDeg -= 180f
-
-                    // pinta el texto con rotación y una banda semi-transparente para legibilidad
                     val nc = drawContext.canvas.nativeCanvas
                     val paint = android.graphics.Paint().apply {
                         color = android.graphics.Color.WHITE
-                        textSize = 24f
-                        isAntiAlias = true
+                        textSize = 24f; isAntiAlias = true
                     }
                     val bgPaint = android.graphics.Paint().apply {
                         color = android.graphics.Color.BLACK
-                        alpha = 90 // ~35% opaco
-                        isAntiAlias = true
+                        alpha = 90; isAntiAlias = true
                     }
+                    val angleRad = kotlin.math.atan2(pb.y - pa.y, pb.x - pa.x)
+                    var angleDeg = Math.toDegrees(angleRad.toDouble()).toFloat()
+                    if (angleDeg > 90f || angleDeg < -90f) angleDeg -= 180f // evita texto al revés
 
-                    // medir texto
                     val label = wall.label
-                    val textWidth = paint.measureText(label)
-                    val textHeight = paint.fontMetrics.run { bottom - top }
+                    val textW = paint.measureText(label)
+                    val textH = paint.fontMetrics.run { bottom - top }
+                    val padH = 8f; val padV = 6f
 
-                    // guardar estado, trasladar al medio y rotar
                     nc.save()
                     nc.translate(mid.x, mid.y)
                     nc.rotate(angleDeg)
-
-                    val padH = 8f
-                    val padV = 6f
                     nc.drawRoundRect(
-                        -textWidth / 2f - padH,
-                        -textHeight / 2f - padV,
-                        textWidth / 2f + padH,
-                        textHeight / 2f + padV,
-                        10f, 10f,
-                        bgPaint
+                        -textW/2f - padH, -textH/2f - padV,
+                        textW/2f + padH,  textH/2f + padV,
+                        10f, 10f, bgPaint
                     )
                     nc.drawText(
                         label,
-                        -textWidth / 2f,
-                        - (paint.fontMetrics.ascent + paint.fontMetrics.descent) / 2f,
+                        -textW/2f,
+                        -(paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f,
                         paint
                     )
                     nc.restore()
 
+                    // hit-test de la pared
                     if (tap != null && tappedWall == null) {
                         val d = pointToSegmentDistance(tap, pa, pb)
                         if (d <= 36f) tappedWall = wall
                     }
                 }
 
+                // === 2) DIBUJAR NODOS (puntos + letra) ===
                 nodePositions.forEach { (ch, p) ->
                     val pv = toView(p)
-                    val nodeIsAssigned = assignedNodes.contains(ch)
                     drawCircle(
-                        color = if (nodeIsAssigned) colorAssigned else colorNode,
-                        radius = 10f,
+                        color = if (assignedNodes.contains(ch)) colorAssigned else colorNode,
+                        radius = rNode,
                         center = pv
                     )
+                    // letra
                     drawContext.canvas.nativeCanvas.drawText(
-                        ch.toString(), pv.x + 12f, pv.y - 12f,
+                        ch.toString(),
+                        pv.x + rNode + 6f,
+                        pv.y - rNode - 6f,
                         android.graphics.Paint().apply {
-                            color = android.graphics.Color.BLACK
-                            textSize = 30f; isAntiAlias = true
+                            color = android.graphics.Color.WHITE
+                            textSize = 28f; isAntiAlias = true
                         }
                     )
                 }
 
-                // ===== BOTÓN TECHO (fijo) =====
-                val ceilCenter = Offset(viewSize.width - pad - r, topInsetPx + pad + r)
-
-                run {
-                    val paint = android.graphics.Paint().apply {
-                        color = android.graphics.Color.WHITE   // ⬅️ texto blanco
-                        textSize = 24f
-                        isAntiAlias = true
-                    }
-                    val bg = android.graphics.Paint().apply {
-                        color = android.graphics.Color.BLACK
-                        alpha = 110                            // banda ~43%
-                        isAntiAlias = true
-                    }
-                    val label = "Techo"
-                    val w = paint.measureText(label)
-                    val h = paint.fontMetrics.run { bottom - top }
-                    val px = ceilCenter.x - r - 8f - w        // ⬅️ a la izquierda del círculo
-                    val py = ceilCenter.y
-                    val nc = drawContext.canvas.nativeCanvas
-                    nc.save()
-                    nc.drawRoundRect(px - 6f, py - h/2f - 6f, px + w + 6f, py + h/2f + 6f, 10f, 10f, bg)
-                    nc.drawText(label, px, py - (paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f, paint)
-                    nc.restore()
-                }
-
+                // === 3) BOTONES TECHO/PISO (badges) ===
+                val ceilCenter = Offset(size.width - pad - rBadge, topInsetPx + pad + rBadge)
+                // piso: usa el centroide del polígono si existe; si no, esquina inferior izquierda
                 val centroidModel = nodePositions.values.takeIf { it.isNotEmpty() }?.let { pts ->
                     val sx = pts.sumOf { it.x.toDouble() }.toFloat()
                     val sy = pts.sumOf { it.y.toDouble() }.toFloat()
                     Offset(sx / pts.size, sy / pts.size)
                 }
                 val floorCenter = centroidModel?.let { toView(it) }
-                    ?: Offset(pad + r, viewSize.height - bottomInsetPx - pad - r)
+                    ?: Offset(pad + rBadge, size.height - bottomInsetPx - pad - rBadge)
 
-                drawCircle(color = if (ceilAssigned) colorAssigned else colorUnassigned, radius = r, center = ceilCenter)
-                drawCircle(color = if (floorAssigned) colorAssigned else colorUnassigned, radius = r, center = floorCenter)
+                // círculos
+                drawCircle(color = if (ceilAssigned) colorAssigned else colorUnassigned, radius = rBadge, center = ceilCenter)
+                drawCircle(color = if (floorAssigned) colorAssigned else colorUnassigned, radius = rBadge, center = floorCenter)
 
-                run {
+                // etiquetas “Techo” y “Piso”
+                fun drawBadgeLabel(text: String, cx: Float, cy: Float, above: Boolean) {
                     val paint = android.graphics.Paint().apply {
-                        color = android.graphics.Color.WHITE   // ⬅️ texto blanco
-                        textSize = 24f
-                        isAntiAlias = true
+                        color = android.graphics.Color.WHITE; textSize = 24f; isAntiAlias = true
                     }
-                    val bg = android.graphics.Paint().apply {
-                        color = android.graphics.Color.BLACK
-                        alpha = 110
-                        isAntiAlias = true
-                    }
-                    val label = "Piso"
-                    val w = paint.measureText(label)
+                    val bg = android.graphics.Paint().apply { color = android.graphics.Color.BLACK; alpha = 110; isAntiAlias = true }
+                    val w = paint.measureText(text)
                     val h = paint.fontMetrics.run { bottom - top }
-                    val px = floorCenter.x - w/2f             // debajo del círculo
-                    val py = floorCenter.y + r + 20f
+                    val px = cx - if (above) (w + 2*rBadge + 12f) else (w/2f)      // a la izq. de Techo / centrado bajo Piso
+                    val py = cy + if (above) 0f else (rBadge + 20f)
                     val nc = drawContext.canvas.nativeCanvas
                     nc.save()
-                    nc.drawRoundRect(px - 6f, py - h - 6f, px + w + 6f, py + 6f, 10f, 10f, bg)
-                    nc.drawText(label, px, py - (paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f, paint)
+                    val left = px - 6f; val top = (py - if (above) h/2f else h) - 6f
+                    val right = px + w + 6f; val bottom = py + 6f
+                    nc.drawRoundRect(left, top, right, bottom, 10f, 10f, bg)
+                    nc.drawText(text, px, py - (paint.fontMetrics.ascent + paint.fontMetrics.descent)/2f, paint)
                     nc.restore()
                 }
+                drawBadgeLabel("Techo", ceilCenter.x, ceilCenter.y, above = true)
+                drawBadgeLabel("Piso",  floorCenter.x, floorCenter.y, above = false)
 
-                // ===== HIT-TEST =====
-                fun hitCircle(p: Offset, c: Offset, rad: Float) =
+                // === 4) HIT-TEST badges y pared seleccionada ===
+                fun inCircle(p: Offset, c: Offset, rad: Float) =
                     (p.x - c.x)*(p.x - c.x) + (p.y - c.y)*(p.y - c.y) <= (rad + 10f)*(rad + 10f)
 
                 if (tap != null) {
                     lastTap = null
                     when {
-                        hitCircle(tap, floorCenter, r) -> Handler(Looper.getMainLooper()).post { onFloorTapped() }
-                        hitCircle(tap, ceilCenter, r)  -> Handler(Looper.getMainLooper()).post { onCeilingTapped() }
-                        tappedWall != null             -> Handler(Looper.getMainLooper()).post { onWallTapped(tappedWall!!) }
+                        inCircle(tap, floorCenter, rBadge) -> Handler(Looper.getMainLooper()).post { onFloorTapped() }
+                        inCircle(tap, ceilCenter,  rBadge) -> Handler(Looper.getMainLooper()).post { onCeilingTapped() }
+                        tappedWall != null                 -> Handler(Looper.getMainLooper()).post { onWallTapped(tappedWall!!) }
                     }
                 }
             }
@@ -847,7 +833,7 @@ class CaptureActivity : ComponentActivity() {
     private fun positionsOnCircle(nodes: List<Char>): Map<Char, Offset> {
         if (nodes.isEmpty()) return emptyMap()
         val n = nodes.size
-        val r = 500f
+        val r = 220f
         val startAngle = -90.0
         return nodes.mapIndexed { i, ch ->
             val ang = Math.toRadians(startAngle + i * (360.0 / n))
@@ -1027,4 +1013,36 @@ class CaptureActivity : ComponentActivity() {
         return aliases.any { TextureAssignmentStore.getPack(it) != null }
     }
 
+    private fun loadMeasuredNodePositions(context: Context): Map<Char, Offset>? {
+        val f = File(context.getExternalFilesDir(null), "room_data.json")
+        if (!f.exists()) return null
+
+        return runCatching {
+            val root = org.json.JSONObject(f.readText())
+            val corners = root.getJSONArray("corners")
+            val map = mutableMapOf<Char, Offset>()
+
+            for (i in 0 until corners.length()) {
+                val corner = corners.getJSONObject(i)
+                val label = corner.getString("id").trim().uppercase()[0]
+                val pos = corner.getJSONObject("position")
+                val x = pos.getDouble("x").toFloat()
+                val y = pos.getDouble("y").toFloat()
+                map[label] = Offset(x, y)
+            }
+
+            if (map.isEmpty()) null else {
+                val xs = map.values.map { it.x }
+                val ys = map.values.map { it.y }
+                val minX = xs.minOrNull()!!; val maxX = xs.maxOrNull()!!
+                val minY = ys.minOrNull()!!; val maxY = ys.maxOrNull()!!
+                val dx = (maxX - minX).takeIf { it > 0f } ?: 1f
+                val dy = (maxY - minY).takeIf { it > 0f } ?: 1f
+
+                map.mapValues { (_, p) ->
+                    Offset((p.x - minX) / dx, 1f - (p.y - minY) / dy)
+                }
+            }
+        }.getOrNull()
+    }
 }
