@@ -9,20 +9,23 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.roomify.storage.TextureAssignmentStore
+import com.example.roomify.ui.theme.RoomifyTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -44,74 +47,117 @@ class TextureChooserActivity : ComponentActivity() {
         val targetWall = intent.getStringExtra("targetWall") ?: "Pared"
 
         setContent {
-            MaterialTheme {
-                val choices by produceState(initialValue = emptyList<TextureChoice>(), key1 = Unit) {
-                    value = withContext(Dispatchers.IO) { buildUniqueTextureChoices(cacheDir) }
-                }
+            RoomifyTheme {
+                TextureChooserScaffold(targetWall = targetWall)
+            }
+        }
+    }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Selecciona textura para: $targetWall",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun TextureChooserScaffold(targetWall: String) {
+        val choices by produceState(initialValue = emptyList<TextureChoice>(), key1 = Unit) {
+            value = withContext(Dispatchers.IO) { buildUniqueTextureChoices(cacheDir) }
+        }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Reutilizar textura",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.primary
                     )
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) { inner ->
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(inner)
+                    .padding(16.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp,
+                shadowElevation = 8.dp
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Selecciona textura para: $targetWall",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.primary
+                        )
 
-                    Spacer(Modifier.height(12.dp))
+                        if (choices.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Aún no hay texturas capturadas.")
+                            }
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(choices) { choice ->
+                                    TextureRowCard(
+                                        packLabel = choice.packName,
+                                        previewPath = choice.previewPath,
+                                        onUse = {
+                                            val inferredDir = File(filesDir, "pbrpacks/${choice.packName}")
+                                            val packPath = if (inferredDir.isDirectory) inferredDir.absolutePath
+                                            else File(choice.previewPath).parent // fallback
 
-                    if (choices.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("Aún no hay texturas capturadas.")
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            items(choices) { choice ->
-                                TextureRowCompact(
-                                    packLabel = choice.packName,
-                                    previewPath = choice.previewPath,
-                                    onUse = {
-                                        // calcula packPath preferido
-                                        val inferredDir = File(filesDir, "pbrpacks/${choice.packName}")
-                                        val packPath = if (inferredDir.isDirectory) inferredDir.absolutePath
-                                        else File(choice.previewPath).parent  // fallback razonable
-
-                                        val data = Intent().apply {
-                                            putExtra("albedoPath", choice.previewPath)
-                                            putExtra("processedPath", choice.processedPath)
-                                            putExtra("sourceWall", choice.sourceWallLabel)
-                                            putExtra("packName", choice.packName)   // 👈 nuevo
-                                            putExtra("packPath", packPath)          // 👈 nuevo
+                                            val data = Intent().apply {
+                                                putExtra("albedoPath", choice.previewPath)
+                                                putExtra("processedPath", choice.processedPath)
+                                                putExtra("sourceWall", choice.sourceWallLabel)
+                                                putExtra("packName", choice.packName)
+                                                putExtra("packPath", packPath)
+                                            }
+                                            setResult(Activity.RESULT_OK, data)
+                                            finish()
                                         }
-                                        setResult(Activity.RESULT_OK, data)
-                                        finish()
-                                    }
-                                )
-                                Divider()
+                                    )
+                                }
                             }
                         }
+
+                        OutlinedButton(
+                            onClick = {
+                                setResult(
+                                    Activity.RESULT_FIRST_USER,
+                                    Intent()
+                                        .putExtra("capture_new", true)
+                                        .putExtra("targetWall", targetWall)
+                                )
+                                finish()
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Tomar nueva textura") }
                     }
-
-                    Spacer(Modifier.height(12.dp))
-
-                    OutlinedButton(
-                        onClick = {
-                            setResult(
-                                Activity.RESULT_FIRST_USER,
-                                Intent().putExtra("capture_new", true)
-                                    .putExtra("targetWall", targetWall)
-                            )
-                            finish()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) { Text("📷 Tomar nueva textura") }
                 }
             }
         }
@@ -146,18 +192,16 @@ class TextureChooserActivity : ComponentActivity() {
                     packName = pack ?: "Sin nombre",
                     previewPath = albedo.absolutePath,
                     processedPath = processed,
-                    sourceWallLabel = sourceWall // solo para retornar; NO se muestra
+                    sourceWallLabel = sourceWall // solo para retorno; no se muestra
                 )
             }
         }
-
-        // Orden estable por nombre de pack
         return uniqueByPack.values.toList().sortedBy { it.packName.lowercase() }
     }
 }
 
 @Composable
-private fun TextureRowCompact(
+private fun TextureRowCard(
     packLabel: String,
     previewPath: String,
     onUse: () -> Unit
@@ -166,32 +210,67 @@ private fun TextureRowCompact(
         value = loadScaledBitmapSafe(previewPath, maxDimension = 512)
     }
 
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onUse() }
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onUse() },
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        if (thumb != null) {
-            Image(
-                bitmap = thumb!!.asImageBitmap(),
-                contentDescription = packLabel,
-                modifier = Modifier.size(72.dp),
-                contentScale = ContentScale.Crop
-            )
-        } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Box(
                 modifier = Modifier
-                    .size(72.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(
+                        width = 3.dp,
+                        color = MaterialTheme.colorScheme.primary, // café (como botón principal)
+                        shape = RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
-            ) { Text("N/A") }
-        }
+            ) {
+                if (thumb != null) {
+                    Image(
+                        bitmap = thumb!!.asImageBitmap(),
+                        contentDescription = packLabel,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("N/A", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            }
 
-        Spacer(Modifier.width(12.dp))
-        // 👇 Solo mostramos el nombre del pack (sin pared ni nombre de archivo)
-        Text(packLabel, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.width(14.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    packLabel,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    "Tocar para usar esta textura",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary   // ☕ Café principal en lugar del gris
+                )
+            }
+        }
     }
 }
 
