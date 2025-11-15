@@ -44,6 +44,9 @@
           android:name="WindowManagerPreference:FreeformWindowOrientation"
           android:value="@string/FreeformWindowOrientation_portrait" />
 
+      <layout
+          android:minHeight="300px"
+          android:minWidth="400px" />
     </activity>
     <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="true" />
     <meta-data android:name="com.google.ar.core" android:value="required" />
