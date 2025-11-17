@@ -1,4 +1,3 @@
-// 1. Crea una SplashScreenActivity
 package com.example.roomify
 
 import android.content.Intent

@@ -68,8 +68,6 @@ class PreviewTextureActivity : ComponentActivity() {
         }
     }
 
-    // ---------- UI ----------
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun PreviewScaffold(
@@ -158,7 +156,6 @@ class PreviewTextureActivity : ComponentActivity() {
                 color = MaterialTheme.colorScheme.primary
             )
 
-            // --- Imagen procesada ---
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Imagen procesada", style = MaterialTheme.typography.bodyMedium)
                 Box(
@@ -186,7 +183,6 @@ class PreviewTextureActivity : ComponentActivity() {
                 }
             }
 
-            // --- Textura sugerida ---
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Textura sugerida", style = MaterialTheme.typography.bodyMedium)
                 Box(
@@ -234,8 +230,6 @@ class PreviewTextureActivity : ComponentActivity() {
             }
         }
     }
-
-    // ---------- Lógica de confirmación / retorno ----------
 
     private fun confirmSelection(
         applyTo: String,
@@ -323,8 +317,6 @@ class PreviewTextureActivity : ComponentActivity() {
         finish()
     }
 }
-
-// ---------- Utils ----------
 
 fun loadScaledBitmap(path: String, maxDimension: Int = 1080): Bitmap? {
     val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }

@@ -5093,6 +5093,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_allowHDR_Injected_mE44B43D66A
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_allowMSAA_Injected_mA503AB999C84E0C4C88DE49EDE4516A811685890 (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_allowDynamicResolution_Injected_mF484CE4BA863E5F04C15CA0620B555368CFC77AD (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Camera_get_orthographicSize_Injected_mFFCD8E8A20631003ECE21898562C5CA4E84B672E (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB (intptr_t ___0__unity_self, float ___1_value, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_orthographic_Injected_m9467AA7C67D120A3C2798683A5A1F21CC0C4054F (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t Camera_get_opaqueSortMode_Injected_m6C4B9B4CE9733A852F8417362A13985A6A607F5C (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Camera_get_depth_Injected_mDE0C7B2E599CADDDD5F48086F2EB7968E09B9725 (intptr_t ___0__unity_self, const RuntimeMethod* method) ;
@@ -17731,6 +17732,41 @@ IL_000f:
 		return L_2;
 	}
 }
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Camera_set_orthographicSize_m76DD021032ACB3DDBD052B75EC66DCE3A7295A5C (Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* __this, float ___0_value, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&MarshalledUnityObject_MarshalNotNull_TisCamera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184_m15924AC4F274B53871C5D6A6938813258F728905_RuntimeMethod_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	intptr_t G_B2_0;
+	memset((&G_B2_0), 0, sizeof(G_B2_0));
+	intptr_t G_B1_0;
+	memset((&G_B1_0), 0, sizeof(G_B1_0));
+	{
+		intptr_t L_0;
+		L_0 = MarshalledUnityObject_MarshalNotNull_TisCamera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184_m15924AC4F274B53871C5D6A6938813258F728905_inline(__this, MarshalledUnityObject_MarshalNotNull_TisCamera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184_m15924AC4F274B53871C5D6A6938813258F728905_RuntimeMethod_var);
+		intptr_t L_1 = L_0;
+		if (L_1)
+		{
+			G_B2_0 = L_1;
+			goto IL_000f;
+		}
+		G_B1_0 = L_1;
+	}
+	{
+		ThrowHelper_ThrowNullReferenceException_mA9C7629D32240EE0218631933DAC647668CA63CF(__this, NULL);
+		G_B2_0 = G_B1_0;
+	}
+
+IL_000f:
+	{
+		float L_2 = ___0_value;
+		Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB(G_B2_0, L_2, NULL);
+		return;
+	}
+}
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_orthographic_m904DEFC76C54DA4E30C20A62A86D5D87B7D4DD8F (Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -20179,6 +20215,14 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Camera_get_orthographicSize_Injected_mF
 	_il2cpp_icall_func = (Camera_get_orthographicSize_Injected_mFFCD8E8A20631003ECE21898562C5CA4E84B672E_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Camera::get_orthographicSize_Injected(System.IntPtr)");
 	float icallRetVal = _il2cpp_icall_func(___0__unity_self);
 	return icallRetVal;
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB (intptr_t ___0__unity_self, float ___1_value, const RuntimeMethod* method) 
+{
+	typedef void (*Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB_ftn) (intptr_t, float);
+	static Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB_ftn _il2cpp_icall_func;
+	if (!_il2cpp_icall_func)
+	_il2cpp_icall_func = (Camera_set_orthographicSize_Injected_mA01B93BF867EC6A29F308AAD1A45AC7CD88CD7AB_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.Camera::set_orthographicSize_Injected(System.IntPtr,System.Single)");
+	_il2cpp_icall_func(___0__unity_self, ___1_value);
 }
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Camera_get_orthographic_Injected_m9467AA7C67D120A3C2798683A5A1F21CC0C4054F (intptr_t ___0__unity_self, const RuntimeMethod* method) 
 {

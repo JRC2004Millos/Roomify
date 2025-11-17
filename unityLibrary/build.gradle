@@ -107,7 +107,7 @@ def BuildIl2CppImpl(String workingDir, String configuration, String architecture
         executableExtension = ".exe"
         commandLineArgs = commandLineArgs*.replace('\"', '\\\"')
     }
-    exec {
+    exec{
         executable "${workingDir}/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp${executableExtension}"
         args commandLineArgs
         environment "ANDROID_SDK_ROOT", getSdkDir()

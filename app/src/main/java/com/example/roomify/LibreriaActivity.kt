@@ -50,7 +50,9 @@ class LibreriaActivity : ComponentActivity() {
     }
 
     private fun loadSavedRooms(): List<SavedRoomModel> {
-        val baseDir = File(filesDir, "saved_rooms")
+        val externalRoot = getExternalFilesDir(null) ?: return emptyList()
+
+        val baseDir = File(externalRoot, "Modelos")
         if (!baseDir.exists() || !baseDir.isDirectory) return emptyList()
 
         val files = baseDir.listFiles { f ->
@@ -81,8 +83,10 @@ class LibreriaActivity : ComponentActivity() {
         val token = System.currentTimeMillis().toString()
 
         val intent = Intent(ctx, com.unity3d.player.UnityPlayerActivity::class.java).apply {
-            putExtra("SCENE_TO_LOAD", "RenderScene")
+            putExtra("SCENE_TO_LOAD", "LoaderScene")
             putExtra("ROOM_LAYOUT_PATH", jsonFile.absolutePath)
+
+
             putExtra("INTENT_TOKEN", token)
         }
 
@@ -106,7 +110,7 @@ class LibreriaActivity : ComponentActivity() {
         }
 
         // Filtrar + ordenar
-        val filteredSorted = remember(modelList, searchText, sortDescending) {
+        val filteredSorted =
             modelList
                 .filter {
                     it.spaceName.contains(searchText, ignoreCase = true) ||
@@ -114,7 +118,6 @@ class LibreriaActivity : ComponentActivity() {
                 }
                 .sortedBy { it.lastModified }
                 .let { if (sortDescending) it.reversed() else it }
-        }
 
         Column(
             modifier = Modifier
@@ -207,7 +210,6 @@ class LibreriaActivity : ComponentActivity() {
                         SavedRoomCard(
                             model = model,
                             onClick = {
-                                // Llamamos al método de la Activity
                                 openRoomInUnity(model)
                             }
                         )
@@ -247,22 +249,11 @@ class LibreriaActivity : ComponentActivity() {
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                    text = "ID: ${model.roomId}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Guardado: $dateText",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = model.file.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(0xFF444444)
                 )
             }
         }

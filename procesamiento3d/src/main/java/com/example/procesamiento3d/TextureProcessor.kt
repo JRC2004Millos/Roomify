@@ -30,7 +30,7 @@ object TextureProcessor {
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(5, TimeUnit.MINUTES)
             .writeTimeout(5, TimeUnit.MINUTES)
-            .callTimeout(0, TimeUnit.MILLISECONDS) // sin límite total
+            .callTimeout(0, TimeUnit.MILLISECONDS)
             .build()
     }
 
@@ -69,15 +69,14 @@ object TextureProcessor {
                             dest.outputStream().use { output -> input.copyTo(output) }
                         }
                     }
-                    Log.d("TextureProcessor", "✅ Preview guardada en: ${dest.absolutePath}")
                 } else {
-                    Log.e("TextureProcessor", "❌ No se pudo extraer imagen de preview del ZIP")
+                    Log.e("TextureProcessor", "No se pudo extraer imagen de preview del ZIP")
                 }
             } else {
-                Log.e("TextureProcessor", "❌ No se pudo descargar el ZIP")
+                Log.e("TextureProcessor", "No se pudo descargar el ZIP")
             }
         } else {
-            Log.e("TextureProcessor", "❌ pack_url vacío en la respuesta")
+            Log.e("TextureProcessor", "pack_url vacío en la respuesta")
         }
 
         return Pair(processedBitmap, resp?.pack)
