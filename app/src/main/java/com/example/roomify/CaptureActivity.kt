@@ -188,9 +188,8 @@ class CaptureActivity : ComponentActivity() {
                             }
                         }
 
-                        val hasAnyTexture = (context.cacheDir.listFiles { f ->
-                            f.isFile && f.name.endsWith("_Albedo.png")
-                        } ?: emptyArray()).isNotEmpty()
+                        val packsDir = File(context.filesDir, "pbrpacks")
+                        val hasAnyTexture = packsDir.exists() && (packsDir.listFiles()?.isNotEmpty() == true)
 
                         if (hasAnyTexture) openChooser(targetLabel) else onWallSelected(targetLabel)
                     }
@@ -573,7 +572,7 @@ class CaptureActivity : ComponentActivity() {
                 } catch (_: Exception) {
                 }
             }
-
+            clearTextureCache(ctx)
 
             Log.d("CaptureActivity", "Lanzando Unity con RenderScene")
             ctx.startActivity(intent)
@@ -619,7 +618,6 @@ class CaptureActivity : ComponentActivity() {
             s
         }
 
-        // Pan/zoom
         var scale by remember { mutableStateOf(1f) }
         var offset by remember { mutableStateOf(Offset.Zero) }
         val transformState = remember {
@@ -1005,5 +1003,25 @@ class CaptureActivity : ComponentActivity() {
                 }
             }
         }.getOrNull()
+    }
+
+    private fun clearTextureCache(ctx: Context) {
+        val cache = ctx.cacheDir
+        val toDelete = cache.listFiles { f ->
+            f.isFile && (
+                    f.name.endsWith("_Albedo.png", true) ||
+                            f.name.endsWith("_Processed.jpg", true) ||
+                            f.name.endsWith(".jpg", true)
+                    )
+        } ?: emptyArray()
+
+        toDelete.forEach { file ->
+            try {
+                file.delete()
+                Log.d("CaptureActivity", "Borrado de cache: ${file.name}")
+            } catch (e: Exception) {
+                Log.e("CaptureActivity", "Error borrando ${file.name}: ${e.message}")
+            }
+        }
     }
 }

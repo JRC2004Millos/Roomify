@@ -43,7 +43,6 @@ object TextureProcessor {
         val croppedBitmap = recortarDesdePreviewView(previewView, originalBitmap)
         val processedBitmap = procesarConOpenCV(croppedBitmap)
 
-        // Guarda la imagen procesada (tu flujo actual)
         withContext(Dispatchers.IO) {
             val processedFile = File(context.cacheDir, "${wallName.replace(" ", "_")}_Processed.jpg")
             FileOutputStream(processedFile).use { out ->
@@ -51,12 +50,10 @@ object TextureProcessor {
             }
         }
 
-        // 1) Enviar imagen → obtener pack y pack_url
         val resp = enviarImagenAlServidor(context, processedBitmap)
         val packUrl = resp?.pack_url
         val packName = resp?.pack ?: "pack"
 
-        // 2) Descargar ZIP y extraer SOLO la imagen de preview
         if (!packUrl.isNullOrBlank()) {
             val zip = descargarZip(context, packUrl, packName)
             if (zip != null) {
@@ -112,7 +109,7 @@ object TextureProcessor {
         Utils.bitmapToMat(bitmap, src)
 
         if (src.empty()) {
-            Log.e("OpenCV", "❌ Imagen de entrada está vacía.")
+            Log.e("OpenCV", "Imagen de entrada está vacía.")
             return bitmap
         }
 
@@ -122,7 +119,7 @@ object TextureProcessor {
             1 -> Imgproc.cvtColor(src, converted, Imgproc.COLOR_GRAY2RGB)
             3 -> src.copyTo(converted)
             else -> {
-                Log.e("OpenCV", "❌ Formato de imagen no compatible: ${src.channels()} canales")
+                Log.e("OpenCV", "Formato de imagen no compatible: ${src.channels()} canales")
                 return bitmap
             }
         }
@@ -139,7 +136,6 @@ object TextureProcessor {
         return resultBitmap
     }
 
-    // --- RED: subir imagen y recibir pack_url ---
     private suspend fun enviarImagenAlServidor(
         context: Context,
         bitmap: Bitmap
@@ -156,11 +152,11 @@ object TextureProcessor {
             if (response.isSuccessful) {
                 response.body()
             } else {
-                Log.e("TextureProcessor", "❌ Respuesta HTTP ${response.code()}")
+                Log.e("TextureProcessor", "Respuesta HTTP ${response.code()}")
                 null
             }
         } catch (e: Exception) {
-            Log.e("TextureProcessor", "❌ Error al enviar imagen: ${e.message}")
+            Log.e("TextureProcessor", "Error al enviar imagen: ${e.message}")
             null
         }
     }
@@ -203,16 +199,14 @@ object TextureProcessor {
         ).apply { mkdirs() }
 
         ZipFile(zipFile).use { zip ->
-            // 1) intenta por nombre exacto que vino del server
             var entry: ZipEntry? = null
             if (!previewNameHint.isNullOrBlank()) {
                 entry = zip.getEntry(previewNameHint)
             }
 
-            // 2) si no estaba, recorre todas las entradas con sintaxis Kotlin
             if (entry == null) {
                 val candidates = sequence {
-                    val entries = zip.entries()            // Enumeration<ZipEntry>
+                    val entries = zip.entries()
                     while (entries.hasMoreElements()) {
                         yield(entries.nextElement())
                     }

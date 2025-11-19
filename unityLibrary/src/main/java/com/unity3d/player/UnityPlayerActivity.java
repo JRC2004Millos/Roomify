@@ -12,20 +12,17 @@ import android.view.Window;
 
 public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecycleEvents, IUnityPermissionRequestSupport, IUnityPlayerSupport {
 
-    protected UnityPlayerForActivityOrService mUnityPlayer; // referenced from native code
+    protected UnityPlayerForActivityOrService mUnityPlayer;
 
-    // ---- helpers ----
     private boolean shouldExitUnity(Intent intent) {
         return intent != null && intent.getBooleanExtra("EXIT_UNITY", false);
     }
 
     private void finishSilently() {
-        // Cierra esta Activity sin animaciones. Unity se destruirá en onDestroy()
         try { overridePendingTransition(0, 0); } catch (Throwable ignored) {}
         finish();
         try { overridePendingTransition(0, 0); } catch (Throwable ignored) {}
     }
-    // ------------------
 
     protected String updateUnityCommandLineArguments(String cmdLine) {
         return cmdLine;
@@ -36,7 +33,6 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
-        // Si nos piden cerrar Unity, ni siquiera inicializamos el player.
         if (shouldExitUnity(getIntent())) {
             finishSilently();
             return;
@@ -66,14 +62,12 @@ public class UnityPlayerActivity extends Activity implements IUnityPlayerLifecyc
 
     @Override
     protected void onNewIntent(Intent intent) {
-        // IMPORTANTE: si llega EXIT_UNITY en una instancia existente, ciérrala ya.
         if (shouldExitUnity(intent)) {
-            setIntent(intent); // por consistencia
+            setIntent(intent);
             finishSilently();
             return;
         }
 
-        // Mantener el intent actualizado para que Unity lo lea (SCENE_TO_LOAD, etc.)
         setIntent(intent);
         if (mUnityPlayer != null) {
             mUnityPlayer.newIntent(intent);

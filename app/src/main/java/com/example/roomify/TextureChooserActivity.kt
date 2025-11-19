@@ -30,7 +30,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-// Ítem único por textura (pack). Guardamos una preview y una pared fuente (solo para retorno).
 data class TextureChoice(
     val packName: String,
     val previewPath: String,
@@ -57,7 +56,7 @@ class TextureChooserActivity : ComponentActivity() {
     @Composable
     private fun TextureChooserScaffold(targetWall: String) {
         val choices by produceState(initialValue = emptyList<TextureChoice>(), key1 = Unit) {
-            value = withContext(Dispatchers.IO) { buildUniqueTextureChoices(cacheDir) }
+            value = withContext(Dispatchers.IO) { buildUniqueTextureChoices() }
         }
 
         Scaffold(
@@ -127,7 +126,7 @@ class TextureChooserActivity : ComponentActivity() {
                                         onUse = {
                                             val inferredDir = File(filesDir, "pbrpacks/${choice.packName}")
                                             val packPath = if (inferredDir.isDirectory) inferredDir.absolutePath
-                                            else File(choice.previewPath).parent // fallback
+                                            else File(choice.previewPath).parent
 
                                             val data = Intent().apply {
                                                 putExtra("albedoPath", choice.previewPath)
@@ -163,40 +162,50 @@ class TextureChooserActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Crea lista de texturas únicas:
-     * - Grupo por 'pack' del TextureAssignmentStore
-     * - Usa el primer *_Albedo.png encontrado como preview representativa
-     * - Mantiene processed si existe para esa misma fuente
-     */
-    private fun buildUniqueTextureChoices(cacheDir: File): List<TextureChoice> {
-        val albedos = cacheDir.listFiles { f ->
-            f.isFile && f.name.endsWith("_Albedo.png")
-        } ?: emptyArray()
-
-        val uniqueByPack = LinkedHashMap<String, TextureChoice>() // pack -> choice
-
-        for (albedo in albedos) {
-            val base = albedo.name.removeSuffix("_Albedo.png")
-            val sourceWall = base.replace("_", " ")
-            val pack = TextureAssignmentStore.getPack(sourceWall)
-
-            // Si no hay pack, lo tratamos como único (no se puede deduplicar sin pack)
-            val packKey = pack ?: "UNASSIGNED::$base"
-
-            if (!uniqueByPack.containsKey(packKey)) {
-                val processed = File(cacheDir, "${base}_Processed.jpg")
-                    .takeIf { it.exists() }?.absolutePath
-
-                uniqueByPack[packKey] = TextureChoice(
-                    packName = pack ?: "Sin nombre",
-                    previewPath = albedo.absolutePath,
-                    processedPath = processed,
-                    sourceWallLabel = sourceWall // solo para retorno; no se muestra
-                )
-            }
+    private fun buildUniqueTextureChoices(): List<TextureChoice> {
+        val packsRoot = File(filesDir, "pbrpacks")
+        if (!packsRoot.exists() || !packsRoot.isDirectory) {
+            Log.d("TextureChooser", "No existe carpeta de packs: ${packsRoot.absolutePath}")
+            return emptyList()
         }
-        return uniqueByPack.values.toList().sortedBy { it.packName.lowercase() }
+
+        val packDirs = packsRoot.listFiles { f -> f.isDirectory } ?: emptyArray()
+        if (packDirs.isEmpty()) {
+            Log.d("TextureChooser", "No hay subcarpetas de packs en: ${packsRoot.absolutePath}")
+            return emptyList()
+        }
+
+        val result = mutableListOf<TextureChoice>()
+
+        for (dir in packDirs) {
+            val previewFile = findPreviewTextureInPack(dir) ?: continue
+
+            result += TextureChoice(
+                packName = dir.name,
+                previewPath = previewFile.absolutePath,
+                processedPath = null,
+                sourceWallLabel = dir.name
+            )
+        }
+
+        return result.sortedBy { it.packName.lowercase() }
+    }
+
+    private fun findPreviewTextureInPack(packDir: File): File? {
+        if (!packDir.isDirectory) return null
+
+        val files = packDir.listFiles { f ->
+            f.isFile && (f.name.endsWith(".png", true) || f.name.endsWith(".jpg", true) || f.name.endsWith(".jpeg", true))
+        } ?: return null
+
+        val preferred = listOf("albedo", "basecolor", "base_color", "color", "diffuse")
+        preferred.forEach { key ->
+            files.firstOrNull { f ->
+                f.name.contains(key, ignoreCase = true)
+            }?.let { return it }
+        }
+
+        return files.firstOrNull()
     }
 }
 
